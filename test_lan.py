@@ -41,7 +41,10 @@ def mac_initial():
     yield client
     client.close()
 
-
+# reboot mainly check if the ***_rebooted.txt exists, if not then create file and reboot DUT
+# it also help program to know if DUT is done to the reboot process or not.
+#reboot process will create the run.bat file in strartup folder at the same time
+# return false = reboot is finish.
 def reboot(name,item):
     location = os.path.expanduser('~')
     script_location=f'{location}\\Desktop\\other_test\\auto\\'
@@ -56,13 +59,13 @@ def reboot(name,item):
             a.write('')
         cmd('shutdown /r')
         print('exist')
-        time.sleep(60)
 
     else:
         return False
         # os.unlink(f'{script_location}{name}_rebooted.txt')
         # os.unlink(f'{auto_location}run.bat')
 
+# check if the test item has been tested or not.
 def process_finish(name):
     location = os.path.expanduser('~')
     script_location = f'{location}\\Desktop\\other_test\\auto\\'
@@ -87,7 +90,9 @@ def test_wol(request, get_mac,item):
         pass
     else:
         pytest.skip('The function is not selected.')
+
     #update bios setting
+    #no need to load default, because other itmes will overwrite the bios setting to set other items as default setting
     act=bios_update.Action()
     act.set_item('i219 Wake on LAN', 'Disabled', 'item')
     act.action()
