@@ -8,10 +8,18 @@ class BiosData:
         self.title_name=None
         self.target_name=None
         self.list=[]
+        self.extract()
 
 
     def extract(self):
-        pass
+        process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /o /s .\\nvram.txt', shell=True,
+                                   stdout=subprocess.PIPE)
+        process.stdout.read()
+        #save the default bios setting at first initial.
+        if not os.path.exists('.\\tool\\AMISCE\\default.txt'):
+            process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /o /s .\\default.txt', shell=True,
+                                       stdout=subprocess.PIPE)
+            process.stdout.read()
 
     def set_title_name(self,name):
         self.title_name=name
@@ -86,6 +94,11 @@ class Method(ABC):
         #     if not i:
         #         break
 
+    def save_default_bios(self):
+        process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /i /s .\\default.txt', shell=True,
+                                   stdout=subprocess.PIPE)
+        process.stdout.read()
+
 
 
 
@@ -125,6 +138,13 @@ class ChangeValue(Method):
         self.wtire_file()
         self.save_to_bios()
 
+class DefaultBios(Method):
+    def __init__(self):
+        super().__init__()
+
+    def action(self, datanode):
+        self.save_default_bios()
+
 
 class Manager:
     def __init__(self):
@@ -159,11 +179,14 @@ class Action:
         lan.set_bios_target_item(self.target)
         item_change=ChangeItems()
         value_change=ChangeValue()
+        default_bios=DefaultBios()
+
         if self.type == 'item':
             lan.do_update(item_change)
-        else:
+        if self.type == 'value':
             lan.do_update(value_change)
-
+        if self.type == 'default':
+            lan.do_update(default_bios)
 
 # act=Action()
 # act.set_item('Quiet Boot', '0','value')
@@ -171,4 +194,9 @@ class Action:
 
 # act=Action()
 # act.set_item('Energy Efficient Turbo', 'Disabled','item')
+# act.action()
+
+#make bios load default
+# act=Action()
+# act.set_item(None, None,'default')
 # act.action()
