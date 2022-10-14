@@ -1,4 +1,4 @@
-import socket,subprocess,datetime,time,pickle,re,pytest,os
+import socket,subprocess,datetime,time,pickle,re,pytest,os,requests
 import bios_update
 from common_func import cmd,process_finish,reboot
 
@@ -119,17 +119,17 @@ def test_wolxx(request, get_mac, item):
 #     else:
 #         pytest.skip('The function is not selected.')
 
-def test_surf_web(request, get_mac, item):
-# def test_wolxx(request, get_mac, mac_initial, item):
-    # client=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # client.connect(('192.168.0.10',6666))
+def test_surf_web(request, item):
+    # def test_wolxx(request, get_mac, mac_initial, item):
+
     if item in ['all', request.node.name]:
         pass
     else:
         pytest.skip('The function is not selected.')
-    # update bios setting
-    act = bios_update.Action()
-    act.set_item('i219 Wake on LAN', 'Disabled', 'item')
+
+    # make bios load default
+    act=bios_update.Action()
+    act.set_item(None, None,'default')
     act.action()
 
     # reboot DUT with setup pytest command in startup folder
@@ -138,3 +138,16 @@ def test_surf_web(request, get_mac, item):
 
     if not _reboot and not _process:
         pytest.skip('The function is finished, so skip')
+
+
+    re=requests.get("https://www.google.com.tw/")
+    assert re.status_code == 200
+
+def test_down_load_file(request, item):
+    pass
+
+
+
+
+
+
