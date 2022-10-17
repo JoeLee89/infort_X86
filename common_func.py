@@ -31,7 +31,7 @@ def reboot(name,item):
             f.write(data)
         with open(f'{script_location}{name}_rebooted.txt','w') as a:
             a.write('')
-        # cmd('shutdown /r')
+        cmd('shutdown /r')
         pytest.skip('first reboot will not test the function.')
         exit()
 
