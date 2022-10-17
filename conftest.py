@@ -1,6 +1,6 @@
 import pytest
 def pytest_addoption(parser):
-    parser.addoption('--item',action='store',default=None,help='input the function name you need to test, or input all for all items')
+    parser.addoption('--item',action='store',default='all',help='input the function name you need to test, or input all for all items')
 
 def pytest_generate_tests(metafunc):
     # print('all=',metafunc.fixturenames)
