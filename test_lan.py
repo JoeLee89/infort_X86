@@ -1,6 +1,6 @@
-import socket,subprocess,datetime,time,pickle,re,pytest,os,requests
+import socket,subprocess,datetime,time,pickle,re,pytest,os,requests,sys
 import bios_update
-from common_func import cmd,process_finish,reboot
+from common_func import cmd,process_finish,reboot, PreSetting
 
 @pytest.fixture
 def get_mac():
@@ -143,8 +143,22 @@ def test_surf_web(request, item):
     re=requests.get("https://www.google.com.tw/")
     assert re.status_code == 200
 
-def test_down_load_file(request, item):
-    pass
+def test_download_file(request, item):
+    presetting = PreSetting()
+    presetting.bios_set([None, None, 'default'])
+    presetting.func_set(request.node.name, item)
+    re=presetting.act()
+    if not re[0]:
+        pytest.skip(re[1])
+
+    link='http://http.speed.hinet.net/test_010m.zip'
+    url=requests.get(link)
+    content=len(url.content)
+    print(content)
+    print(re)
+
+
+    assert content > 0
 
 
 
