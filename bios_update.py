@@ -7,19 +7,22 @@ class BiosData:
         self.data=[]
         self.title_name=None
         self.target_name=None
+        self.folder_path = '.\\tool\\AMISCE'
         self.list=[]
         self.extract()
 
 
+
     def extract(self):
-        process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /o /s .\\nvram.txt', shell=True,
+        process = subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /o /s {self.folder_path}\\nvram.txt', shell=True,
                                    stdout=subprocess.PIPE)
-        process.stdout.read()
+        print(process.stdout.read())
+
         #save the default bios setting at first initial.
-        if not os.path.exists('.\\tool\\AMISCE\\default.txt'):
-            process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /o /s .\\default.txt', shell=True,
+        if not os.path.exists(f'{self.folder_path}\\default.txt'):
+            process = subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /o /s {self.folder_path}\\default.txt', shell=True,
                                        stdout=subprocess.PIPE)
-            process.stdout.read()
+            print(process.stdout.read())
 
     def set_title_name(self,name):
         self.title_name=name
@@ -34,7 +37,7 @@ class BiosData:
 
 
     def search(self):
-        with open('.\\tool\\AMISCE\\nvram.txt') as f:
+        with open(f'{self.folder_path}\\nvram.txt') as f:
             self.data=f.readlines()
             # print(self.data)
         re=0
@@ -53,6 +56,7 @@ class BiosData:
 
 class Method(ABC):
     def __init__(self):
+        self.folder_path = '.\\tool\\AMISCE'
         self.data=None
         self.start_location=None
         self.target_location=None
@@ -78,14 +82,14 @@ class Method(ABC):
                 return re
         return False
 
-    def wtire_file(self):
+    def write_file(self):
         print('Start writing the searched result to temp.txt for further usage.')
-        with open('temp.txt','w') as f:
+        with open(f'{self.folder_path}\\temp.txt','w') as f:
             for i in self.data:
                 f.write(i)
 
     def save_to_bios(self):
-        process=subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /i /s .\\temp.txt', shell=True, stdout=subprocess.PIPE)
+        process=subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /i /s {self.folder_path}\\temp.txt', shell=True, stdout=subprocess.PIPE)
         # process=subprocess.Popen('', stdout=subprocess.PIPE)
         process.stdout.read()
         # print('aa=',re)
@@ -95,7 +99,7 @@ class Method(ABC):
         #         break
 
     def save_default_bios(self):
-        process = subprocess.Popen('.\\tool\\AMISCE\\SCEWIN_64.exe /i /s .\\default.txt', shell=True,
+        process = subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /i /s {self.folder_path}\\default.txt', shell=True,
                                    stdout=subprocess.PIPE)
         process.stdout.read()
 
@@ -117,7 +121,7 @@ class ChangeItems(Method):
         index=self.data[self.target_location].find('[')
         self.data[self.target_location]=self.data[self.target_location][:index]+'*'+self.data[self.target_location][index:]
         pprint(self.data)
-        self.wtire_file()
+        self.write_file()
         self.save_to_bios()
 
 
@@ -135,7 +139,7 @@ class ChangeValue(Method):
         # replace the original value to expected value based on the index01/02 position
         self.data[self.start_location] = self.data[self.start_location][:index01+1]+ datanode.target_name+self.data[self.start_location][index02:]
         pprint(self.data)
-        self.wtire_file()
+        self.write_file()
         self.save_to_bios()
 
 class DefaultBios(Method):
