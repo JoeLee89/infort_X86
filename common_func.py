@@ -31,7 +31,7 @@ def reboot(name,item):
             f.write(data)
         with open(f'{script_location}{name}_rebooted.txt','w') as a:
             a.write('')
-        cmd('shutdown /r')
+        # cmd('shutdown /r')
         pytest.skip('first reboot will not test the function.')
         exit()
 
@@ -68,10 +68,13 @@ class PreSetting:
         self.bios_setting=content
 
     def bios_act(self):
-        act = bios_update.Action()
-        # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
-        act.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
-        act.action()
+        location = os.path.expanduser('~')
+        script_location = f'{location}\\Desktop\\other_test\\automation\\'
+        if not os.path.exists(f'{script_location}{self.name}_rebooted.txt'):
+            act = bios_update.Action()
+            # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
+            act.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
+            act.action()
 
     def func_set(self,name,item):
         self.name=name
@@ -85,11 +88,14 @@ class PreSetting:
             return [False,'The function is not selected.']
             # pytest.skip('The function is not selected.')
 
+        #bios item update
+        self.bios_act()
         _reboot = reboot(self.name, self.item)
         _process = process_finish(self.name)
 
         #launch first time reboot=none process=true
         #launch second time reboot=false process=true
+        #launch third time reboot=false process=false
         if not _reboot and not _process:
             return [False, 'The function is finished, so skip']
             # pytest.skip('The function is finished, so skip')
