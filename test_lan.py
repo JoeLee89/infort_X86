@@ -1,6 +1,6 @@
 import socket,subprocess,datetime,time,pickle,re,pytest,os,requests,sys
 import bios_update
-from common_func import cmd,process_finish,reboot, PreSetting
+from common_func import *
 
 @pytest.fixture
 def get_mac():
@@ -154,12 +154,79 @@ def test_download_file(request, item):
     link='http://http.speed.hinet.net/test_010m.zip'
     url=requests.get(link)
     content=len(url.content)
-    print(content)
-    print(re)
+    assert content == 10485760
 
+def test_s3(request, item):
+    presetting = PreSetting()
+    presetting.bios_set([None, None, 'default'])
+    presetting.func_set(request.node.name, item)
+    re=presetting.act()
+    if not re[0]:
+        pytest.skip(re[1])
+    command='wmic nic where netEnabled=true get name, speed'
+    re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    item=['intel','realtek']
 
-    assert content > 0
+    first=[]
+    second=[]
+    while True:
+        output=re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for i in item:
+            if i in output:
+                first.append(output)
 
+    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 30 -N 1 -E')
+    #wait for lan device recovery to be detected.
+    time.sleep(20)
+
+    re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output=re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for m in first:
+            if m in output:
+                second.append(output)
+
+    assert first == second
+
+def test_s4(request, item):
+    presetting = PreSetting()
+    presetting.bios_set([None, None, 'default'])
+    presetting.func_set(request.node.name, item)
+    re=presetting.act()
+    if not re[0]:
+        pytest.skip(re[1])
+    command='wmic nic where netEnabled=true get name, speed'
+    re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    item=['intel','realtek']
+
+    first=[]
+    second=[]
+    while True:
+        output=re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for i in item:
+            if i in output:
+                first.append(output)
+
+    cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 60 -N 1 -E')
+    #wait for lan device recovery to be detected.
+    time.sleep(20)
+
+    re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output=re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for m in first:
+            if m in output:
+                second.append(output)
+
+    assert first == second
 
 
 
