@@ -162,7 +162,7 @@ class ActManage:
 # re = data.act()
 # print(re)
 
-#won't be able to flash bios
+#won't be able to flash bios, and skip reboot if bios update data as [] none data
 # data = Data()
 # data.set_name_item('abc', 'all')
 # data.bios_set([])
