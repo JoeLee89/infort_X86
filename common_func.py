@@ -10,11 +10,13 @@ def cmd(command):
 
 
 class Process(ABC):
-    def __init__(self, name, item):
-        self.name = name
-        self.item = item
-        self.location = os.path.expanduser('~')
-        self.script_location = f'{self.location}\\Desktop\\other_test\\automation\\'
+    def __init__(self,data):
+        self.data=data
+        self.name=self.data.name
+        self.item=self.data.item
+        self.location=os.path.expanduser('~')
+        self.bios_setting=self.data.bios
+        self.script_location=f'{self.location}\\Desktop\\other_test\\automation\\'
         self.auto_location = f'{self.location}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\'
 
     @abstractmethod
@@ -23,16 +25,15 @@ class Process(ABC):
 
 
 class Bios(Process):
-    def __init__(self, name, item):
-        super().__init__(name, item)
-        self.next_duty = None
-        self.bios_setting = None
+    def __init__(self,data):
+        super().__init__(data)
+        self.next_duty=None
 
-    def set_duputy(self, deputy):
-        self.next_duty = deputy
+    def set_duputy(self,deputy):
+        self.next_duty=deputy
 
-    def bios_set(self, content: list):
-        self.bios_setting = content
+    def bios_set(self,content:list):
+        self.bios_setting=content
 
     def act(self):
         location = os.path.expanduser('~')
@@ -54,36 +55,42 @@ class Bios(Process):
 # reboot process will create the run.bat file in strartup folder at the same time
 # return false = reboot is finish.
 class Reboot(Process):
-    def __init__(self, name, item):
-        super().__init__(name, item)
-        self.next_duty = None
+    def __init__(self,data):
+        super().__init__(data)
+        self.next_duty=None
 
-    def set_deputy(self, deputy):
-        self.next_duty = deputy
+    def set_deputy(self,deputy):
+        self.next_duty=deputy
 
     def act(self):
-        file_name = None
-        # to rememmber command line file name needed to be tested. so it each reboot will launch the same setting
+        file_name=None
+        #to rememmber command line file name needed to be tested. so it each reboot will launch the same setting
         # as it is set at first by user
         for i in sys.argv:
             if '.py' in i:
-                file_name = i
+                file_name=i
 
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
         if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
-            data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
-            with open(f'{self.auto_location}run.bat', 'w') as f:
-                f.write(data)
-            with open(f'{self.script_location}{self.name}_rebooted.txt', 'w') as a:
-                a.write('')
-            # cmd('shutdown /r')
-            pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
-            exit()
+            if len(self.bios_setting) > 0:
+
+                with open(f'{self.auto_location}run.bat','w') as f:
+                    f.write(_data)
+                with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
+                    a.write('')
+                # cmd('shutdown /r')
+                pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
+                exit()
+            else:
+                with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
+                    a.write('')
+                    return self.next_duty.act()
 
         else:
             return self.next_duty.act()
         #     return False
-        # os.unlink(f'{script_location}{name}_rebooted.txt')
-        # os.unlink(f'{auto_location}run.bat')
+            # os.unlink(f'{script_location}{name}_rebooted.txt')
+            # os.unlink(f'{auto_location}run.bat')
 
 
 # check if the test item has been tested or not.
@@ -94,10 +101,10 @@ class ProcessFinishConfirm(Process):
             pass
 
         else:
-            return [False, 'The function is not selected.']
+            return [False,'The function is not selected.']
 
         if not os.path.exists(f'{self.script_location}{self.name}_finish.txt'):
-            with open(f'{self.script_location}{self.name}_finish.txt', 'w') as a:
+            with open(f'{self.script_location}{self.name}_finish.txt','w') as a:
                 a.write('')
             return [True]
         else:
@@ -106,25 +113,42 @@ class ProcessFinishConfirm(Process):
             # except:
             #     pass
             return [False, 'The function is finished, so skip']
-
-
 class Data:
+    def __init__(self,name,item,bios):
+        self._name = name
+        self._item = item
+        self._bios_setting = bios
+
+    @property
+    def bios(self):
+        return self._bios_setting
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def item(self):
+        return self._item
+
+
+class ActManage:
     def __init__(self):
-        self.name = None
         self.item = None
-        self.bios_setting = []
+        self.bios_setting = None
 
-    def bios_set(self, value: list):
-        self.bios_setting = value
+    def bios_set(self,value:list):
+        self.bios_setting=value
 
-    def set_name_item(self, name, item):
-        self.name = name
-        self.item = item
+    def set_name_item(self,name,item):
+        self.name=name
+        self.item=item
 
     def act(self):
-        bios = Bios(self.name, self.item)
-        reboot = Reboot(self.name, self.item)
-        process_confirm = ProcessFinishConfirm(self.name, self.item)
+        data=Data(self.name,self.item,self.bios_setting)
+        bios=Bios(data)
+        reboot = Reboot(data)
+        process_confirm=ProcessFinishConfirm(data)
 
         bios.set_duputy(reboot)
         bios.bios_set(self.bios_setting)
@@ -135,5 +159,12 @@ class Data:
 # data = Data()
 # data.set_name_item('abc', 'all')
 # data.bios_set([None, None, 'default'])
+# re = data.act()
+# print(re)
+
+#won't be able to flash bios
+# data = Data()
+# data.set_name_item('abc', 'all')
+# data.bios_set([])
 # re = data.act()
 # print(re)
