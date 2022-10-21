@@ -157,12 +157,12 @@ def test_download_file(request, item):
     assert content == 10485760
 
 def test_s3(request, item):
-    presetting = PreSetting()
-    presetting.bios_set([None, None, 'default'])
-    presetting.func_set(request.node.name, item)
-    re=presetting.act()
-    if not re[0]:
-        pytest.skip(re[1])
+    data = ActManage()
+    data.set_name_item(request.node.name, item)
+    data.bios_set([])
+    data_re = data.act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
     command='wmic nic where netEnabled=true get name, speed'
     re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     item=['intel','realtek']
@@ -193,12 +193,12 @@ def test_s3(request, item):
     assert first == second
 
 def test_s4(request, item):
-    presetting = PreSetting()
-    presetting.bios_set([None, None, 'default'])
-    presetting.func_set(request.node.name, item)
-    re=presetting.act()
-    if not re[0]:
-        pytest.skip(re[1])
+    data = ActManage()
+    data.set_name_item(request.node.name, item)
+    data.bios_set([])
+    data_re = data.act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
     command='wmic nic where netEnabled=true get name, speed'
     re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     item=['intel','realtek']
