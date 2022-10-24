@@ -229,6 +229,110 @@ def test_s4(request, item):
     assert first == second
 
 
+def test_lan1_disable(request, item):
+    item = ['intel', 'realtek']
+    command = 'wmic nic where netEnabled=true get name'
+    before = []
+    after = []
+
+    # write data info to file
+    if not os.path.exists('.\\temp\\before.txt'):
+        re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        while True:
+            output = re.stdout.readline().decode().strip().lower()
+            if output == "":
+                break
+            for i in item:
+                if i in output:
+                    with open('.\\temp\\before.txt', 'a') as a:
+                        a.write(output + '\n')
+
+    # start changing bios setting
+    data = ActManage()
+    data.set_name_item(request.node.name, item)
+    if 'intel' in before:
+        data.bios_set(['PCH LAN i219-V Controller', 'Disabled', 'item'])
+    else:
+        data.bios_set(['LAN1 Enable', 'Disabled', 'item'])
+    data_re = data.act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
+
+    # read all lan info, before bios item is changed.
+    with open('.\\temp\\before.txt', 'r') as a:
+        before = a.read().strip()
+        before = before.split('\n')
+        print(before)
+
+    # read all lan info, after bios item is changed.
+    re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output = re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for i in item:
+            if i in output:
+                after.append(output)
+    os.unlink('.\\temp\\before.txt')
+    assert before[0] != after[0]
+
+def test_lan2_disable(request, item):
+    item = ['intel', 'realtek']
+    command = 'wmic nic where netEnabled=true get name'
+    before=[]
+    after=[]
+
+    #write data info to file
+    if not os.path.exists('.\\temp\\before.txt'):
+        re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+        while True:
+            output=re.stdout.readline().decode().strip().lower()
+            if output == "":
+                break
+            for i in item:
+                if i in output:
+                    with open('.\\temp\\before.txt', 'a') as a:
+                        a.write(output+'\n')
+
+    #start changing bios setting
+    data = ActManage()
+    data.set_name_item(request.node.name, item)
+    if 'intel' in before:
+        data.bios_set(['PCH LAN i211 Controller','Disabled','item'])
+    else:
+        data.bios_set(['LAN2 Enable', 'Disabled', 'item'])
+    data_re = data.act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
+
+    #read all lan info, before bios item is changed.
+    with open('.\\temp\\before.txt','r') as a:
+        before=a.read().strip()
+        before=before.split('\n')
+        print(before)
+
+    #read all lan info, after bios item is changed.
+    re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while True:
+        output = re.stdout.readline().decode().strip().lower()
+        if output == "":
+            break
+        for i in item:
+            if i in output:
+                after.append(output)
+    os.unlink('.\\temp\\before.txt')
+    assert before[1] != after[0]
+
+
+
+
+
+
+
+
+
 
 
 
