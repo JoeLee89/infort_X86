@@ -38,6 +38,7 @@ class Bios(Process):
     def act(self):
         location = os.path.expanduser('~')
         script_location = f'{location}\\Desktop\\other_test\\automation\\'
+        act=None
         if len(self.bios_setting) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
@@ -45,7 +46,10 @@ class Bios(Process):
             act = bios_update.Action()
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
             act.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
+        try:
             act.action()
+        except LookupError:
+            pytest.skip('can not find the assigned title, so will skip the test.')
 
         return self.next_duty.act()
 
@@ -156,14 +160,20 @@ class ActManage:
         return bios.act()
 
 
-# data = Data()
+# data = ActManage()
+# data.set_name_item('abc', 'all')
+# data.bios_set(['Quiet Boot1', '0','value'])
+# data_re = data.act()
+# print(data_re)
+
+# data = ActManage()
 # data.set_name_item('abc', 'all')
 # data.bios_set([None, None, 'default'])
 # re = data.act()
 # print(re)
 
 #won't be able to flash bios, and skip reboot if bios update data as [] none data
-# data = Data()
+# data = ActManage()
 # data.set_name_item('abc', 'all')
 # data.bios_set([])
 # re = data.act()

@@ -41,10 +41,12 @@ class BiosData:
             self.data=f.readlines()
             # print(self.data)
         re=0
+        #find the needed title first, then find the end of the item
         for i in self.data:
             if self.title_name in i:
                 re=self.data.index(i)
                 break
+            raise LookupError('Can not find the assigned title name in bios setting')
 
         for i in self.data[re:]:
             if i != '\n':
@@ -53,6 +55,7 @@ class BiosData:
                 break
 
         return self.data[:6]+self.list
+
 
 class Method(ABC):
     def __init__(self):
@@ -193,7 +196,7 @@ class Action:
             lan.do_update(default_bios)
 
 # act=Action()
-# act.set_item('Quiet Boot', '0','value')
+# act.set_item('Quiet Boot1', '0','value')
 # act.action()
 
 # act=Action()
