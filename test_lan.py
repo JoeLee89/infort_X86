@@ -35,9 +35,43 @@ def mac_initial():
     yield client
     client.close()
 
+def device_manage_action(name,require):
+    from pywinauto import Application, Desktop
+    name = name
+    require= require
+    Application().start(r'mmc devmgmt.msc')
+    app = Application(backend='uia').connect(path='mmc.exe')
+    main = app.window(title='Device Manager')
+    lan = main.child_window(title='Network adapters', control_type='TreeItem')
+    lan.expand()
+    lan_target = lan.child_window(title=name, control_type='TreeItem', found_index=0)
+    lan_target.click_input(button='left', double=True)
+    win = app[f'{name} Properties']
+    win['Advanced'].select()
+    win['Vertical'].wheel_mouse_input(wheel_dist=-20)
+    win['Wake on Magic Packet'].select()
+    while True:
+        status = win['ComboBox'].selected_text()
+        if require == 'Enabled':
+            if status == require:
+                break
+            else:
+                win['ComboBox'].type_keys('{DOWN}')
+                if win['ComboBox'].selected_text() != require:
+                    win['ComboBox'].type_keys('{UP}')
+        if require == 'Disabled':
+            if status == require:
+                break
+            else:
+                win['ComboBox'].type_keys('{UP}')
+                if win['ComboBox'].selected_text() != require:
+                    win['ComboBox'].type_keys('{DOWN}')
+
+    win['OK'].click()
+    main.close()
 
 # def test_wol(request, get_mac,mac_initial,item):
-def test_wol(request, get_mac,item):
+def test_wol_bios_enable(request, get_mac,item):
     # client=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # client.connect(('192.168.0.10',6666))
     if item in ['all',request.node.name]:
@@ -58,29 +92,29 @@ def test_wol(request, get_mac,item):
     if not _reboot and not _process:
         pytest.skip('The function is finished, so skip')
 
-    #
-    # client=mac_initial
-    # mac_list=get_mac
-    # data=['wol']
 
-    # data=data+mac_list
-    #
-    # #send data to console in package list
-    # data=pickle.dumps(data)
-    # # data=data.encode('utf-8')
-    # client.sendall(data)
-    #
-    # while True:
-    #     recv=client.recv(1024)
-    #     if recv=='ok':
-    #         print(f'from server receive:{recv}')
-    #         break
-    # now = datetime.datetime.now()
-    # cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 60 -N 1 -F -E')
-    #
-    # after=datetime.datetime.now()
-    # re=(after-now).seconds
-    # assert re < 300
+    client=mac_initial
+    mac_list=get_mac
+    data=['wol']
+
+    data=data+mac_list
+
+    #send data to console in package list
+    data=pickle.dumps(data)
+    # data=data.encode('utf-8')
+    client.sendall(data)
+
+    while True:
+        recv=client.recv(1024)
+        if recv=='ok':
+            print(f'from server receive:{recv}')
+            break
+    now = datetime.datetime.now()
+    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 60 -N 1 -F -E')
+
+    after=datetime.datetime.now()
+    re=(after-now).seconds
+    assert re < 300
 
 
 def test_wolxx(request, get_mac, item):
@@ -214,6 +248,7 @@ def test_s4(request, item):
                 first.append(output)
 
     cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 60 -N 1 -E')
+
     #wait for lan device recovery to be detected.
     time.sleep(20)
 
