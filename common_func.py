@@ -158,21 +158,15 @@ class ActManage:
         return bios.act()
 
 
-# data = ActManage()
-# data.set_name_item('abc', 'all')
-# data.bios_set(['Quiet Boot1', '0','value'])
-# data_re = data.act()
+# data = ActManage('abc', 'all')
+# data.bios_set(['Quiet Boot1', '0','value']).act()
 # print(data_re)
 
-# data = ActManage()
-# data.set_name_item('abc', 'all')
-# data.bios_set([None, None, 'default'])
-# re = data.act()
+# data = ActManage('abc', 'all')
+# data.bios_set([None, None, 'default']).act()
 # print(re)
 
 #won't be able to flash bios, and skip reboot if bios update data as [] none data
-# data = ActManage()
-# data.set_name_item('abc', 'all')
-# data.bios_set([])
-# re = data.act()
+# data = ActManage('abc', 'all')
+# data.bios_set([]).act()
 # print(re)
