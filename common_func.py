@@ -137,16 +137,14 @@ class Data:
 
 
 class ActManage:
-    def __init__(self):
-        self.item = None
+    def __init__(self,item,name):
+        self.item = item
         self.bios_setting = None
+        self.name=name
 
     def bios_set(self,value:list):
         self.bios_setting=value
-
-    def set_name_item(self,name,item):
-        self.name=name
-        self.item=item
+        return self
 
     def act(self):
         data=Data(self.name,self.item,self.bios_setting)
