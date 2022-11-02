@@ -26,7 +26,21 @@ def get_mac():
         if not line:
             break
     return mac_list if mac_list else []
-
+@pytest.fixture()
+def lan_device_number_get():
+    sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    i = 0
+    re = []
+    while True:
+        data = sub.stdout.readline().decode().strip().split(maxsplit=3)
+        for content in data:
+            if content.startswith('Ethernet'):
+                re.append(content)
+        if len(data) == 0:
+            i += 1
+        if i == 2:
+            break
+    return re
 
 @pytest.fixture
 def mac_initial():
@@ -35,7 +49,8 @@ def mac_initial():
     yield client
     client.close()
 
-def device_manage_action(name,require):
+#control wol disable/enable action
+def device_wol_manage_action(name,require):
     from pywinauto import Application, Desktop
     name = name
     require= require
@@ -153,37 +168,40 @@ def test_wolxx(request, get_mac, item):
 #     else:
 #         pytest.skip('The function is not selected.')
 
-def test_surf_web(request, item):
+
+
+@pytest.mark.parametrize('lan',['lan1','lan2'])
+def test_surf_web(request, item,lan,lan_device_number_get):
     # def test_wolxx(request, get_mac, mac_initial, item):
-
-    if item in ['all', request.node.name]:
-        pass
+    if lan=='lan1':
+        print('it is going to disable Lan2')
+        #disable lan2 first to make sure srufing web device is lan1
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
+        #enable lan1
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
+        time.sleep(20)
     else:
-        pytest.skip('The function is not selected.')
+        print('it is going to disable Lan1')
+        # disable lan1 first to make sure srufing web device is lan2
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=disabled')
+        # enable lan2
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
+        time.sleep(20)
 
-    # make bios load default
-    act=bios_update.Action()
-    act.set_item(None, None,'default')
-    act.action()
 
-    # reboot DUT with setup pytest command in startup folder
-    _reboot = reboot(request.node.name, item)
-    _process = process_finish(request.node.name)
-
-    if not _reboot and not _process:
-        pytest.skip('The function is finished, so skip')
-
+    # data = ActManage(request.node.name, item)
+    # data_re = data.bios_set([None, None, 'default']).act()
+    # if not data_re[0]:
+    #     pytest.skip(data_re[1])
 
     re=requests.get("https://www.google.com.tw/")
     assert re.status_code == 200
 
 def test_download_file(request, item):
-    presetting = PreSetting()
-    presetting.bios_set([None, None, 'default'])
-    presetting.func_set(request.node.name, item)
-    re=presetting.act()
-    if not re[0]:
-        pytest.skip(re[1])
+    data = ActManage(request.node.name, item)
+    data_re = data.bios_set([None, None, 'default']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
 
     link='http://http.speed.hinet.net/test_010m.zip'
     url=requests.get(link)
@@ -191,15 +209,13 @@ def test_download_file(request, item):
     assert content == 10485760
 
 def test_s3(request, item):
-    data = ActManage()
-    data.set_name_item(request.node.name, item)
-    data.bios_set([])
-    data_re = data.act()
+    data = ActManage(request.node.name, item)
+    data_re=data.bios_set([]).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
     command='wmic nic where netEnabled=true get name, speed'
     re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    item=['intel','realtek']
+    lan_chip=['intel','realtek']
 
     first=[]
     second=[]
@@ -207,7 +223,7 @@ def test_s3(request, item):
         output=re.stdout.readline().decode().strip().lower()
         if output == "":
             break
-        for i in item:
+        for i in lan_chip:
             if i in output:
                 first.append(output)
 
@@ -227,15 +243,13 @@ def test_s3(request, item):
     assert first == second
 
 def test_s4(request, item):
-    data = ActManage()
-    data.set_name_item(request.node.name, item)
-    data.bios_set([])
-    data_re = data.act()
+    data = ActManage(request.node.name, item)
+    data_re=data.bios_set([]).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
     command='wmic nic where netEnabled=true get name, speed'
     re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    item=['intel','realtek']
+    lan_chip=['intel','realtek']
 
     first=[]
     second=[]
@@ -243,7 +257,7 @@ def test_s4(request, item):
         output=re.stdout.readline().decode().strip().lower()
         if output == "":
             break
-        for i in item:
+        for i in lan_chip:
             if i in output:
                 first.append(output)
 
@@ -265,12 +279,12 @@ def test_s4(request, item):
 
 
 def test_lan1_disable(request, item):
-    item = ['intel', 'realtek']
+    lan_chip = ['intel', 'realtek']
     command = 'wmic nic where netEnabled=true get name'
     before = []
     after = []
 
-    # write data info to file
+    #write all lan data info to file
     if not os.path.exists('.\\temp\\before.txt'):
         re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -278,19 +292,17 @@ def test_lan1_disable(request, item):
             output = re.stdout.readline().decode().strip().lower()
             if output == "":
                 break
-            for i in item:
+            for i in lan_chip:
                 if i in output:
                     with open('.\\temp\\before.txt', 'a') as a:
                         a.write(output + '\n')
 
     # start changing bios setting
-    data = ActManage()
-    data.set_name_item(request.node.name, item)
+    data = ActManage(request.node.name, item)
     if 'intel' in before:
-        data.bios_set(['PCH LAN i219-V Controller', 'Disabled', 'item'])
+        data_re = data.bios_set(['PCH LAN i219-V Controller', 'Disabled', 'item']).act()
     else:
-        data.bios_set(['LAN1 Enable', 'Disabled', 'item'])
-    data_re = data.act()
+        data_re = data.bios_set(['LAN1 Enable', 'Disabled', 'item']).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
 
@@ -306,19 +318,19 @@ def test_lan1_disable(request, item):
         output = re.stdout.readline().decode().strip().lower()
         if output == "":
             break
-        for i in item:
+        for i in lan_chip:
             if i in output:
                 after.append(output)
     os.unlink('.\\temp\\before.txt')
     assert before[0] != after[0]
 
 def test_lan2_disable(request, item):
-    item = ['intel', 'realtek']
+    lan_chip = ['intel', 'realtek']
     command = 'wmic nic where netEnabled=true get name'
     before=[]
     after=[]
 
-    #write data info to file
+    #write all lan data info to file
     if not os.path.exists('.\\temp\\before.txt'):
         re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
@@ -326,19 +338,17 @@ def test_lan2_disable(request, item):
             output=re.stdout.readline().decode().strip().lower()
             if output == "":
                 break
-            for i in item:
+            for i in lan_chip:
                 if i in output:
                     with open('.\\temp\\before.txt', 'a') as a:
                         a.write(output+'\n')
 
     #start changing bios setting
-    data = ActManage()
-    data.set_name_item(request.node.name, item)
+    data = ActManage(request.node.name, item)
     if 'intel' in before:
-        data.bios_set(['PCH LAN i211 Controller','Disabled','item'])
+        data_re=data.bios_set(['PCH LAN i211 Controller','Disabled','item']).act()
     else:
-        data.bios_set(['LAN2 Enable', 'Disabled', 'item'])
-    data_re = data.act()
+        data_re=data.bios_set(['LAN2 Enable', 'Disabled', 'item']).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
 
@@ -354,7 +364,7 @@ def test_lan2_disable(request, item):
         output = re.stdout.readline().decode().strip().lower()
         if output == "":
             break
-        for i in item:
+        for i in lan_chip:
             if i in output:
                 after.append(output)
     os.unlink('.\\temp\\before.txt')
