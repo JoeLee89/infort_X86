@@ -38,12 +38,11 @@ class Bios(Process):
     def act(self):
         location = os.path.expanduser('~')
         script_location = f'{location}\\Desktop\\other_test\\automation\\'
-        act=None
+        act = bios_update.Action()
         if len(self.bios_setting) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
         if not os.path.exists(f'{script_location}{self.name}_rebooted.txt'):
-            act = bios_update.Action()
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
             act.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
         try:
@@ -105,7 +104,7 @@ class ProcessFinishConfirm(Process):
             pass
 
         else:
-            return [False,'The function is not selected.']
+            return [False,f'The function is not selected. so far the function={self.item}']
 
         if not os.path.exists(f'{self.script_location}{self.name}_finish.txt'):
             with open(f'{self.script_location}{self.name}_finish.txt','w') as a:
@@ -137,7 +136,7 @@ class Data:
 
 
 class ActManage:
-    def __init__(self,item,name):
+    def __init__(self,name,item):
         self.item = item
         self.bios_setting = None
         self.name=name

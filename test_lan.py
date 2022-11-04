@@ -1,6 +1,13 @@
 import socket,subprocess,datetime,time,pickle,re,pytest,os,requests,sys
 import bios_update
 from common_func import *
+intel_lan_type=[
+    'PCH LAN i219-V Controller',
+    'PCH LAN i211 Controller']
+
+realtek_lan_type=[
+    'LAN1 Enable',
+    'LAN2 Enable']
 
 @pytest.fixture
 def get_mac():
@@ -26,6 +33,7 @@ def get_mac():
         if not line:
             break
     return mac_list if mac_list else []
+
 @pytest.fixture()
 def lan_device_number_get():
     sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -89,24 +97,23 @@ def device_wol_manage_action(name,require):
 def test_wol_bios_enable(request, get_mac,item):
     # client=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # client.connect(('192.168.0.10',6666))
-    if item in ['all',request.node.name]:
-        pass
+
+    command = 'wmic nic where netEnabled=true get name'
+
+    # write all lan data info to file
+    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result=sub.stdout.read()
+    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+
+    # start changing bios setting
+    data = ActManage(request.node.name, item)
+    #disable lan2 chip
+    if 'intel' in result:
+        data_re = data.bios_set([intel_lan_type[1], 'Disabled', 'item']).act()
     else:
-        pytest.skip('The function is not selected.')
-
-    #update bios setting
-    #no need to load default, because other itmes will overwrite the bios setting to set other items as default setting
-    act=bios_update.Action()
-    act.set_item('i219 Wake on LAN', 'Disabled', 'item')
-    act.action()
-
-    #reboot DUT with setup pytest command in startup folder
-    _reboot=reboot(request.node.name,item)
-    _process=process_finish(request.node.name)
-
-    if not _reboot and not _process:
-        pytest.skip('The function is finished, so skip')
-
+        data_re = data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
 
     client=mac_initial
     mac_list=get_mac
@@ -132,47 +139,13 @@ def test_wol_bios_enable(request, get_mac,item):
     assert re < 300
 
 
-def test_wolxx(request, get_mac, item):
-# def test_wolxx(request, get_mac, mac_initial, item):
-    # client=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # client.connect(('192.168.0.10',6666))
-    if item in ['all', request.node.name]:
-        pass
-    else:
-        pytest.skip('The function is not selected.')
-    # update bios setting
-    act = bios_update.Action()
-    act.set_item('i219 Wake on LAN', 'Disabled', 'item')
-    act.action()
-
-    # reboot DUT with setup pytest command in startup folder
-    _reboot = reboot(request.node.name, item)
-    _process = process_finish(request.node.name)
-
-    if not _reboot and not _process:
-        pytest.skip('The function is finished, so skip')
-#
-# def test_test(item):
-#     if item in ['all','test_test']:
-#         print('got name=', item)
-#     else:
-#         pytest.skip('The function is not selected.')
-#     #found what kind of the name is the function used?
-#     # print('aaa=',request.node.name)
-#     # bios_update(request.node.name)
-#
-#     # print('finish')
-# def test_test11(item):
-#     if item in ['all','test_test11']:
-#         print('got name=', item)
-#     else:
-#         pytest.skip('The function is not selected.')
-
-
-
 @pytest.mark.parametrize('lan',['lan1','lan2'])
 def test_surf_web(request, item,lan,lan_device_number_get):
-    # def test_wolxx(request, get_mac, mac_initial, item):
+    data = ActManage(request.node.name, item)
+    data_re = data.bios_set([None, None, 'default']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
+
     if lan=='lan1':
         print('it is going to disable Lan2')
         #disable lan2 first to make sure srufing web device is lan1
@@ -188,20 +161,31 @@ def test_surf_web(request, item,lan,lan_device_number_get):
         subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
         time.sleep(20)
 
-
-    # data = ActManage(request.node.name, item)
-    # data_re = data.bios_set([None, None, 'default']).act()
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
     re=requests.get("https://www.google.com.tw/")
     assert re.status_code == 200
 
-def test_download_file(request, item):
+
+@pytest.mark.parametrize('lan',['lan1','lan2'])
+def test_download_file(request, item, lan,lan_device_number_get):
     data = ActManage(request.node.name, item)
     data_re = data.bios_set([None, None, 'default']).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
+
+    if lan=='lan1':
+        print('it is going to disable Lan2')
+        #disable lan2 first to make sure srufing web device is lan1
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
+        #enable lan1
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
+        time.sleep(30)
+    else:
+        print('it is going to disable Lan1')
+        # disable lan1 first to make sure srufing web device is lan2
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=disabled')
+        # enable lan2
+        subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
+        time.sleep(30)
 
     link='http://http.speed.hinet.net/test_010m.zip'
     url=requests.get(link)
@@ -297,20 +281,20 @@ def test_lan1_disable(request, item):
                     with open('.\\temp\\before.txt', 'a') as a:
                         a.write(output + '\n')
 
-    # start changing bios setting
-    data = ActManage(request.node.name, item)
-    if 'intel' in before:
-        data_re = data.bios_set(['PCH LAN i219-V Controller', 'Disabled', 'item']).act()
-    else:
-        data_re = data.bios_set(['LAN1 Enable', 'Disabled', 'item']).act()
-    if not data_re[0]:
-        pytest.skip(data_re[1])
-
     # read all lan info, before bios item is changed.
     with open('.\\temp\\before.txt', 'r') as a:
         before = a.read().strip()
         before = before.split('\n')
         print(before)
+
+    # start changing bios setting
+    data = ActManage(request.node.name, item)
+    if 'intel' in before:
+        data_re = data.bios_set([intel_lan_type[0], 'Disabled', 'item']).act()
+    else:
+        data_re = data.bios_set([realtek_lan_type[0], 'Disabled', 'item']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
 
     # read all lan info, after bios item is changed.
     re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -343,20 +327,20 @@ def test_lan2_disable(request, item):
                     with open('.\\temp\\before.txt', 'a') as a:
                         a.write(output+'\n')
 
-    #start changing bios setting
-    data = ActManage(request.node.name, item)
-    if 'intel' in before:
-        data_re=data.bios_set(['PCH LAN i211 Controller','Disabled','item']).act()
-    else:
-        data_re=data.bios_set(['LAN2 Enable', 'Disabled', 'item']).act()
-    if not data_re[0]:
-        pytest.skip(data_re[1])
-
     #read all lan info, before bios item is changed.
     with open('.\\temp\\before.txt','r') as a:
         before=a.read().strip()
         before=before.split('\n')
         print(before)
+
+    #start changing bios setting
+    data = ActManage(request.node.name, item)
+    if 'intel' in before:
+        data_re=data.bios_set([intel_lan_type[1],'Disabled','item']).act()
+    else:
+        data_re=data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
 
     #read all lan info, after bios item is changed.
     re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -369,7 +353,6 @@ def test_lan2_disable(request, item):
                 after.append(output)
     os.unlink('.\\temp\\before.txt')
     assert before[1] != after[0]
-
 
 
 
