@@ -24,6 +24,28 @@ class Process(ABC):
         pass
 
 
+class PreCheck(Process):
+    def __init__(self,data):
+        super().__init__(data)
+        self.next_duty=None
+
+    def set_deputy(self,deputy):
+        self.next_duty=deputy
+
+    def act(self):
+
+        if self.item in ['all', self.name]:
+            print('Assigned item=', self.item)
+            print('Function name=', self.name)
+            return self.next_duty.act()
+            # pytest.skip("Assigned item doesn't match, so skip the test")
+        else:
+            print('Assigned item=', self.item)
+            print('Function name=', self.name)
+            return [False, f'The function is not selected. so far the function={self.item}']
+
+
+
 class Bios(Process):
     def __init__(self,data):
         super().__init__(data)
@@ -48,7 +70,7 @@ class Bios(Process):
         try:
             act.action()
         except LookupError:
-            pytest.skip('can not find the assigned title, so will skip the test.')
+            pytest.skip('can not find the assigned BIOS title, so will skip the test.')
 
         return self.next_duty.act()
 
@@ -82,7 +104,8 @@ class Reboot(Process):
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
                 # cmd('shutdown /r')
-                pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
+                print(f'Test item={self.name}. Reboot first, Function will not test, while bios item is being changing')
+                # pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
                 exit()
             else:
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
@@ -100,11 +123,11 @@ class Reboot(Process):
 class ProcessFinishConfirm(Process):
 
     def act(self):
-        if self.item in ['all', self.name]:
-            pass
-
-        else:
-            return [False,f'The function is not selected. so far the function={self.item}']
+        # if self.item in ['all', self.name]:
+        #     pass
+        #
+        # else:
+        #     return [False,f'The function is not selected. so far the function={self.item}']
 
         if not os.path.exists(f'{self.script_location}{self.name}_finish.txt'):
             with open(f'{self.script_location}{self.name}_finish.txt','w') as a:
@@ -147,14 +170,16 @@ class ActManage:
 
     def act(self):
         data=Data(self.name,self.item,self.bios_setting)
+        precheck=PreCheck(data)
         bios=Bios(data)
         reboot = Reboot(data)
         process_confirm=ProcessFinishConfirm(data)
 
+        precheck.set_deputy(bios)
         bios.set_duputy(reboot)
         bios.bios_set(self.bios_setting)
         reboot.set_deputy(process_confirm)
-        return bios.act()
+        return precheck.act()
 
 
 # data = ActManage('abc', 'all')
