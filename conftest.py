@@ -11,8 +11,8 @@ def pytest_generate_tests(metafunc):
     if 'item' in metafunc.fixturenames and option_value is not None:
         metafunc.parametrize('item',[option_value])
 
-@pytest.fixture(autouse=True)
-def bios_load_default():
-    bios = bios_update.Action()
-    bios.set_item(None, None, 'default')
-    bios.action()
+# @pytest.fixture(autouse=True)
+# def bios_load_default():
+#     bios = bios_update.Action()
+#     bios.set_item(None, None, 'default')
+#     bios.action()

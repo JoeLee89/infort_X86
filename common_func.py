@@ -1,4 +1,4 @@
-import subprocess,os,sys,pytest
+import subprocess,os,sys,pytest,time
 import bios_update
 from abc import ABC,abstractmethod
 
@@ -50,6 +50,12 @@ class Bios(Process):
     def __init__(self,data):
         super().__init__(data)
         self.next_duty=None
+        self.bios=bios_update.Action()
+
+    def bios_update_default(self):
+        print('Start making BIOS load default first.')
+        self.bios.set_item(None, None, 'default')
+        self.bios.action()
 
     def set_duputy(self,deputy):
         self.next_duty=deputy
@@ -60,15 +66,15 @@ class Bios(Process):
     def act(self):
         location = os.path.expanduser('~')
         script_location = f'{location}\\Desktop\\other_test\\automation\\'
-        act = bios_update.Action()
         if len(self.bios_setting) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
         if not os.path.exists(f'{script_location}{self.name}_rebooted.txt'):
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
-            act.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
+            self.bios_update_default()
+            self.bios.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
         try:
-            act.action()
+            self.bios.action()
         except LookupError:
             pytest.skip('can not find the assigned BIOS title, so will skip the test.')
 
@@ -95,7 +101,8 @@ class Reboot(Process):
             if '.py' in i:
                 file_name=i
 
-        _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
+        # _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs --item={self.item}'
         if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
             if len(self.bios_setting) > 0:
 
@@ -103,9 +110,10 @@ class Reboot(Process):
                     f.write(_data)
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
-                # cmd('shutdown /r')
+                # cmd('shutdown /r /t 2 /f')
                 print(f'Test item={self.name}. Reboot first, Function will not test, while bios item is being changing')
                 # pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
+                time.sleep(10)
                 exit()
             else:
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:

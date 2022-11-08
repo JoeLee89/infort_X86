@@ -9,6 +9,30 @@ realtek_lan_type=[
     'LAN1 Enable',
     'LAN2 Enable']
 
+def get_lan_name():
+    proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
+    title = 0
+    search_title = re.compile(r'Ethernet adapter Ethernet.*:')
+    search_address = re.compile(r'Description.*: (.*)')
+    lan_list=[]
+    for line in iter(proc.stdout.readline,''):
+        # print(line.strip())
+        line=line.decode('utf-8')
+        # print(line)
+        search_title_Re = search_title.search(line)
+        search_addresse_Re = search_address.search(line)
+
+        if not title and search_title_Re:
+            title = 1
+        if title and search_addresse_Re:
+            # print(search_addresse_Re.group(1).replace('-', ''))
+            lan_list.append(search_addresse_Re.group(1).strip())
+            title = 0
+
+        if not line:
+            break
+    return lan_list if lan_list else []
+
 @pytest.fixture
 def get_mac():
     proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
@@ -98,29 +122,34 @@ def device_wol_manage_action(name,require):
 def item_name_filter(name):
     return re.search('(.*)\[.*\]',name).group(1)
 
+@pytest.mark.skip('no test')
+def test_lan1_wol_bios_enable_os_enable(request, get_mac,item,mac_initial):
+    name=item_name_filter(request.node.name)
+    command = 'wmic nic where netEnabled=true get name'
 
-def test_wol_bios_enable(request, get_mac,item,mac_initial):
-    # name=item_name_filter(request.node.name)
-    # command = 'wmic nic where netEnabled=true get name'
-    #
-    # # get all lan devices info
-    # sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    # result=sub.stdout.read()
-    # result=[i for i in result.decode().lower().split() if 'intel' in i][0]
-    #
-    # # start changing bios setting
-    # data = ActManage(name, item)
-    # #disable lan2 chip
-    # if 'intel' in result:
-    #     data_re = data.bios_set([intel_lan_type[1], 'Disabled', 'item']).act()
-    # else:
-    #     data_re = data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-    #
+    # get all lan devices info
+    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    result=sub.stdout.read()
+    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+
+    # start changing bios setting
+    data = ActManage(name, item)
+    #disable lan2 chip
+    if 'intel' in result:
+        data_re = data.bios_set([intel_lan_type[1], 'Disabled', 'item']).act()
+    else:
+        data_re = data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
+    if not data_re[0]:
+        pytest.skip(data_re[1])
+
+    #enable lan device in OS device management
+    lan=get_lan_name()
+    device_wol_manage_action(lan[0],'Enabled')
+
+    #get client side object and read to send MAC address to server
     client=mac_initial
     mac_adr=get_mac[0]
-    #send data to console in package list
+    #send MAC data to server
     client.sendall(mac_adr.encode('utf-8'))
     #
     while True:
@@ -128,12 +157,12 @@ def test_wol_bios_enable(request, get_mac,item,mac_initial):
         if recv=='ok':
             print(f'from server receive:{recv}')
             break
-    # now = datetime.datetime.now()
-    # cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 60 -N 1 -F -E')
-    #
-    # after=datetime.datetime.now()
-    # _re=(after-now).seconds
-    # assert _re < 300
+    now = datetime.datetime.now()
+    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 60 -N 1 -F -E')
+
+    after=datetime.datetime.now()
+    _re=(after-now).seconds
+    assert _re < 300
 
 
 def test_lan1_surf_web(request, item,lan_device_number_get):
@@ -150,8 +179,15 @@ def test_lan1_surf_web(request, item,lan_device_number_get):
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
     time.sleep(20)
 
-    _re=requests.get("https://www.google.com.tw/")
+    try:
+        _re=requests.get("https://www.google.com.tw/")
+    except Exception as a:
+        _re=a
+
+    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled').wait()
+    time.sleep(20)
     assert _re.status_code == 200
+
 
 def test_lan2_surf_web(request, item,lan_device_number_get):
     name = item_name_filter(request.node.name)
@@ -166,7 +202,13 @@ def test_lan2_surf_web(request, item,lan_device_number_get):
     # enable lan2
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
     time.sleep(20)
-    _re=requests.get("https://www.google.com.tw/")
+
+    try:
+        _re = requests.get("https://www.google.com.tw/")
+    except Exception as a:
+        _re = a
+
+    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled').wait()
     assert _re.status_code == 200
 
 def test_lan1_download_file(request, item, lan_device_number_get):
