@@ -1,14 +1,20 @@
 import socket,subprocess,datetime,time,pickle,re,pytest,os,requests,sys,re
 import bios_update
 from common_func import *
-intel_lan_type=[
+intel_lan_controller_type=[
     'PCH LAN i219-V Controller',
     'PCH LAN i211 Controller']
 
-realtek_lan_type=[
+realtek_lan_controller_type=[
     'LAN1 Enable',
     'LAN2 Enable']
+intel_wakeonlan_type=[
+    'i219 Wake on LAN',
+    'i211-AT Wake on LAN']
 
+realtek_wakeonelan_type=[
+    'LAN1 Enable',
+    'LAN2 Enable']
 def get_lan_name():
     proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
     title = 0
@@ -76,7 +82,7 @@ def lan_device_number_get():
 
 @pytest.fixture
 def mac_initial():
-    ip='127.0.0.1'
+    ip='192.168.0.19'
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect((ip, 8000))
     yield client
@@ -122,35 +128,38 @@ def device_wol_manage_action(name,require):
 def item_name_filter(name):
     return re.search('(.*)\[.*\]',name).group(1)
 
-@pytest.mark.skip('no test')
-def test_lan1_wol_bios_enable_os_enable(request, get_mac,item,mac_initial):
-    name=item_name_filter(request.node.name)
-    command = 'wmic nic where netEnabled=true get name'
-
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
-
-    # start changing bios setting
-    data = ActManage(name, item)
-    #disable lan2 chip
-    if 'intel' in result:
-        data_re = data.bios_set([intel_lan_type[1], 'Disabled', 'item']).act()
-    else:
-        data_re = data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
-    if not data_re[0]:
-        pytest.skip(data_re[1])
+# @pytest.mark.skip('no test')
+def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,mac_initial):
+    # name=item_name_filter(request.node.name)
+    # command = 'wmic nic where netEnabled=true get name'
+    #
+    # # get all lan devices info
+    # sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # result=sub.stdout.read()
+    # result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    #
+    # # start changing bios setting
+    # data = ActManage(name, item)
+    # #disable lan2 chip
+    # if 'intel' in result:
+    #     data_re = data.bios_set([intel_wakeonlan_type[1], 'Disabled', 'item']).act()
+    # else:
+    #     data_re = data.bios_set([realtek_wakeonlan_type[1], 'Disabled', 'item']).act()
+    # if not data_re[0]:
+    #     pytest.skip(data_re[1])
 
     #enable lan device in OS device management
     lan=get_lan_name()
-    device_wol_manage_action(lan[0],'Enabled')
+    device_wol_manage_action(lan[1],'Enabled')
 
+    #
     #get client side object and read to send MAC address to server
     client=mac_initial
-    mac_adr=get_mac[0]
+    mac_adr=get_mac[1]
+
     #send MAC data to server
     client.sendall(mac_adr.encode('utf-8'))
+    # pytest.skip()
     #
     while True:
         recv=client.recv(1024).decode()
@@ -158,11 +167,12 @@ def test_lan1_wol_bios_enable_os_enable(request, get_mac,item,mac_initial):
             print(f'from server receive:{recv}')
             break
     now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 60 -N 1 -F -E')
+    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 150 -N 1 -F -E')
+    time.sleep(10)
 
     after=datetime.datetime.now()
     _re=(after-now).seconds
-    assert _re < 300
+    assert _re < 150
 
 
 def test_lan1_surf_web(request, item,lan_device_number_get):
@@ -350,9 +360,9 @@ def test_lan1_disable(request, item):
     name = item_name_filter(request.node.name)
     data = ActManage(name, item)
     if 'intel' in before:
-        data_re = data.bios_set([intel_lan_type[0], 'Disabled', 'item']).act()
+        data_re = data.bios_set([intel_lan_controller_type[0], 'Disabled', 'item']).act()
     else:
-        data_re = data.bios_set([realtek_lan_type[0], 'Disabled', 'item']).act()
+        data_re = data.bios_set([realtek_lan_controller_type[0], 'Disabled', 'item']).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
 
@@ -397,9 +407,9 @@ def test_lan2_disable(request, item):
     name = item_name_filter(request.node.name)
     data = ActManage(name, item)
     if 'intel' in before:
-        data_re=data.bios_set([intel_lan_type[1],'Disabled','item']).act()
+        data_re=data.bios_set([intel_lan_controller_type[1], 'Disabled', 'item']).act()
     else:
-        data_re=data.bios_set([realtek_lan_type[1], 'Disabled', 'item']).act()
+        data_re=data.bios_set([realtek_lan_controller_type[1], 'Disabled', 'item']).act()
     if not data_re[0]:
         pytest.skip(data_re[1])
 
