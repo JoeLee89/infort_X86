@@ -4,7 +4,7 @@ from abc import ABC,abstractmethod
 
 def cmd(command):
     subp=subprocess.Popen(command,shell=True)
-    subp.wait(300)
+    # subp.wait(300)
     if subp.poll() != 0:
         print('Failed to launch the tool with the command.')
 
@@ -13,7 +13,7 @@ class Process(ABC):
     def __init__(self,data):
         self.data=data
         self.name=self.data.name
-        self.item=self.data.item
+        self.path=self.data.path
         self.location=os.path.expanduser('~')
         self.bios_setting=self.data.bios
         self.script_location=f'{self.location}\\Desktop\\other_test\\automation\\'
@@ -24,25 +24,25 @@ class Process(ABC):
         pass
 
 
-class PreCheck(Process):
-    def __init__(self,data):
-        super().__init__(data)
-        self.next_duty=None
-
-    def set_deputy(self,deputy):
-        self.next_duty=deputy
-
-    def act(self):
-
-        if self.item in ['all', self.name]:
-            print('Assigned item=', self.item)
-            print('Function name=', self.name)
-            return self.next_duty.act()
-            # pytest.skip("Assigned item doesn't match, so skip the test")
-        else:
-            print('Assigned item=', self.item)
-            print('Function name=', self.name)
-            return [False, f'The function is not selected. so far the function={self.item}']
+# class PreCheck(Process):
+#     def __init__(self,data):
+#         super().__init__(data)
+#         self.next_duty=None
+#
+#     def set_deputy(self,deputy):
+#         self.next_duty=deputy
+#
+#     def act(self):
+#
+#         if self.item in ['all', self.name]:
+#             print('Assigned item=', self.item)
+#             print('Function name=', self.name)
+#             return self.next_duty.act()
+#             # pytest.skip("Assigned item doesn't match, so skip the test")
+#         else:
+#             print('Assigned item=', self.item)
+#             print('Function name=', self.name)
+#             return [False, f'The function is not selected. so far the function={self.item}']
 
 
 
@@ -102,7 +102,7 @@ class Reboot(Process):
                 file_name=i
 
         # _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
-        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs --item={self.item}'
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\test_report '
         if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
             if len(self.bios_setting) > 0:
 
@@ -110,7 +110,7 @@ class Reboot(Process):
                     f.write(_data)
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
-                # cmd('shutdown /r /t 2 /f')
+                cmd('shutdown /r /t 1 /f')
                 print(f'Test item={self.name}. Reboot first, Function will not test, while bios item is being changing')
                 # pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
                 time.sleep(10)
@@ -118,39 +118,40 @@ class Reboot(Process):
             else:
                 with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
-                    return self.next_duty.act()
+                    # return self.next_duty.act()
 
         else:
-            return self.next_duty.act()
-        #     return False
-            # os.unlink(f'{script_location}{name}_rebooted.txt')
-            # os.unlink(f'{auto_location}run.bat')
+            print('Test item has rebooted before, so skip the reboot process.')
+            # return self.next_duty.act()
+
+            #if the test item has rebooted before, then should delete the run.bat batch file
+            os.unlink(f'{self.auto_location}run.bat')
 
 
 # check if the test item has been tested or not.
-class ProcessFinishConfirm(Process):
-
-    def act(self):
-        # if self.item in ['all', self.name]:
-        #     pass
-        #
-        # else:
-        #     return [False,f'The function is not selected. so far the function={self.item}']
-
-        if not os.path.exists(f'{self.script_location}{self.name}_finish.txt'):
-            with open(f'{self.script_location}{self.name}_finish.txt','w') as a:
-                a.write('')
-            return [True]
-        else:
-            # try:
-            #     os.unlink(f'{auto_location}run.bat')
-            # except:
-            #     pass
-            return [False, 'The function is finished, so skip']
+# class ProcessFinishConfirm(Process):
+#
+#     def act(self):
+#         # if self.item in ['all', self.name]:
+#         #     pass
+#         #
+#         # else:
+#         #     return [False,f'The function is not selected. so far the function={self.item}']
+#
+#         if not os.path.exists(f'{self.script_location}{self.name}_finish.txt'):
+#             with open(f'{self.script_location}{self.name}_finish.txt','w') as a:
+#                 a.write('')
+#             return [True]
+#         else:
+#             # try:
+#             #     os.unlink(f'{auto_location}run.bat')
+#             # except:
+#             #     pass
+#             return [False, 'The function is finished, so skip']
 class Data:
-    def __init__(self,name,item,bios):
+    def __init__(self,path,name,bios):
         self._name = name
-        self._item = item
+        self._path=path
         self._bios_setting = bios
 
     @property
@@ -162,32 +163,32 @@ class Data:
         return self._name
 
     @property
-    def item(self):
-        return self._item
-
+    def path(self):
+        return self._path
 
 class ActManage:
-    def __init__(self,name,item):
-        self.item = item
+    def __init__(self,path,name):
         self.bios_setting = None
         self.name=name
+        self.path=path
 
     def bios_set(self,value:list):
         self.bios_setting=value
         return self
 
     def act(self):
-        data=Data(self.name,self.item,self.bios_setting)
-        precheck=PreCheck(data)
+        data=Data(self.path,self.name,self.bios_setting)
+        # precheck=PreCheck(data)
         bios=Bios(data)
         reboot = Reboot(data)
-        process_confirm=ProcessFinishConfirm(data)
+        # process_confirm=ProcessFinishConfirm(data)
 
-        precheck.set_deputy(bios)
+        # precheck.set_deputy(bios)
         bios.set_duputy(reboot)
         bios.bios_set(self.bios_setting)
-        reboot.set_deputy(process_confirm)
-        return precheck.act()
+        # reboot.set_deputy(process_confirm)
+        # return bios.act()
+        bios.act()
 
 
 # data = ActManage('abc', 'all')

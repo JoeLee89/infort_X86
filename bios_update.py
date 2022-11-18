@@ -45,16 +45,18 @@ class BiosData:
         for i in self.data:
             if self.title_name in i:
                 re=self.data.index(i)
-                break
-            raise LookupError('Can not find the assigned title name in bios setting')
+                for i in self.data[re:]:
+                    if i != '\n':
+                        self.list.append(i)
+                    else:
+                        break
 
-        for i in self.data[re:]:
-            if i != '\n':
-                self.list.append(i)
+                return self.data[:6] + self.list
             else:
-                break
+                continue
+        raise LookupError('Can not find the assigned title name in bios setting')
 
-        return self.data[:6]+self.list
+
 
 
 class Method(ABC):
@@ -200,10 +202,15 @@ class Action:
 # act.action()
 
 # act=Action()
-# act.set_item('Energy Efficient Turbo', 'Disabled','item')
+# act.set_item('BIOS Lock', 'Enabled','item')
+# act.action()
+#
+# act=Action()
+# act.set_item('RTC Lock', 'Enabled','item')
 # act.action()
 
 #make bios load default
 # act=Action()
 # act.set_item(None, None,'default')
 # act.action()
+
