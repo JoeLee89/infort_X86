@@ -237,88 +237,87 @@ def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_ge
     lan_link.close()
     assert _re < 300
 
-@pytest.mark.skip('aaa')
-def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Enabled'
-    bios_status='Enabled'
+# @pytest.mark.skip('aaa')
+# def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_get):
+#     # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+#     #confirm which lan device should be tested, starting from 0
+#     lan_number=1
+#     os_wol_status = 'Enabled'
+#     bios_status='Enabled'
+#
+#     command = 'wmic nic where netEnabled=true get name'
+#
+#     # get all lan devices info
+#     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+#     result=sub.stdout.read()
+#     result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+#
+#     # start changing bios setting
+#     data = ActManage(item_total_path(), request.node.name)
+#
+#     #disable lan2 chip
+#     if 'intel' in result:
+#         data.bios_set([intel_wakeonlan_type[lan_number], bios_status, 'item']).act()
+#     else:
+#         data.bios_set([realtek_wakeonelan_type[lan_number], bios_status, 'item']).act()
+#
+#     #confirm the data_re returned list
+#     # if not data_re[0]:
+#     #     pytest.skip(data_re[1])
+#
+#     lan_link = lan_link_initial(lan_number)
+#     #get client side object and read to send MAC address to server
+#     mac_adr=get_mac[lan_number]
+#
+#     #send MAC data to server
+#     try:
+#         lan_link.sendall(mac_adr.encode('utf-8'))
+#     except Exception as a:
+#         print('Error occured, while lan link.')
+#         lan_link.close()
+#         pytest.skip('server connection has error.')
+#
+#     # enable lan device in OS device management
+#     lan = get_lan_name()
+#     device_wol_manage_action(lan[lan_number], os_wol_status)
+#
+#     while True:
+#         recv=lan_link.recv(1024).decode()
+#         if recv=='ok':
+#             print(f'from server receive:{recv}')
+#             break
+#
+#     now = datetime.datetime.now()
+#     cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
+#
+#     time.sleep(5)
+#     after=datetime.datetime.now()
+#     _re=(after-now).seconds
+#
+#     #reset IP to dynamic status
+#     cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
+#     lan_link.close()
+#     assert _re < 300
 
-    command = 'wmic nic where netEnabled=true get name'
-
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
-
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
-
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([intel_wakeonlan_type[lan_number], bios_status, 'item']).act()
-    else:
-        data.bios_set([realtek_wakeonelan_type[lan_number], bios_status, 'item']).act()
-
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
-        lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
-
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
-
-
-def test_lan1_surf_web(request, lan_device_number_get):
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([None, None, 'default']).act()
-
-    print('it is going to disable Lan2')
-    #disable lan2 first to make sure srufing web device is lan1
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
-    #enable lan1
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
-    time.sleep(20)
-
-    try:
-        _re=requests.get("https://www.google.com.tw/")
-    except Exception as a:
-        _re=a
-
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled').wait()
-    time.sleep(20)
-    assert _re.status_code == 200
+# def test_lan1_surf_web(request, lan_device_number_get):
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([None, None, 'default']).act()
+#
+#     print('it is going to disable Lan2')
+#     #disable lan2 first to make sure srufing web device is lan1
+#     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
+#     #enable lan1
+#     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
+#     time.sleep(20)
+#
+#     try:
+#         _re=requests.get("https://www.google.com.tw/")
+#     except Exception as a:
+#         _re=a
+#
+#     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled').wait()
+#     time.sleep(20)
+#     assert _re.status_code == 200
 
 
 # def test_lan2_surf_web(request, item,lan_device_number_get):
@@ -551,7 +550,7 @@ def test_lan1_surf_web(request, lan_device_number_get):
 
 class TestOther:
     def test_11(self):
-        pytest.exit('abc')
+        # pytest.exit('abc')
         assert 11==11
 
 def test_44():
@@ -559,9 +558,11 @@ def test_44():
     print(aa)
     assert 11==11
 
-def test_current():
+def test_current(final):
     aa=item_total_path()
     print(os.getenv('PYTEST_CURRENT_TEST'))
+
+
 
 # if __name__ == '__main__':
 #
