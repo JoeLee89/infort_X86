@@ -16,7 +16,9 @@ class Process(ABC):
         self.path=self.data.path
         self.location=os.path.expanduser('~')
         self.bios_setting=self.data.bios
-        self.script_location=f'{self.location}\\Desktop\\other_test\\automation\\'
+        # self.script_location=f'{self.location}\\Desktop\\other_test\\automation\\'
+        self.script_location=f'{os.getcwd()}\\'
+        self.temp_log_location='.\\temp\\'
         self.auto_location = f'{self.location}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\'
 
     @abstractmethod
@@ -64,12 +66,11 @@ class Bios(Process):
         self.bios_setting=content
 
     def act(self):
-        location = os.path.expanduser('~')
-        script_location = f'{location}\\Desktop\\other_test\\automation\\'
         if len(self.bios_setting) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
-        if not os.path.exists(f'{script_location}{self.name}_rebooted.txt'):
+        # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
+        if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
             self.bios_update_default()
             self.bios.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
@@ -102,13 +103,15 @@ class Reboot(Process):
                 file_name=i
 
         # _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
-        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\test_report '
-        if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\report '
+        # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
+        if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
             if len(self.bios_setting) > 0:
 
                 with open(f'{self.auto_location}run.bat','w') as f:
                     f.write(_data)
-                with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
+                with open(f'{self.temp_log_location}{self.name}_rebooted.txt','w') as a:
+                # with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
                 cmd('shutdown /r /t 1 /f')
                 print(f'Test item={self.name}. Reboot first, Function will not test, while bios item is being changing')
@@ -116,7 +119,7 @@ class Reboot(Process):
                 time.sleep(10)
                 exit()
             else:
-                with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
+                with open(f'{self.temp_log_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
                     # return self.next_duty.act()
 
@@ -125,7 +128,10 @@ class Reboot(Process):
             # return self.next_duty.act()
 
             #if the test item has rebooted before, then should delete the run.bat batch file
-            os.unlink(f'{self.auto_location}run.bat')
+            try:
+                os.unlink(f'{self.auto_location}run.bat')
+            except FileNotFoundError:
+                print('There is no file in auto start folder.')
 
 
 # check if the test item has been tested or not.
