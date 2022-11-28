@@ -13,9 +13,14 @@ import pytest,items_collection,os,subprocess,re
 #
 
 def comparison():
+    # get now test case name, and delete no needed strings
     now_test_case=os.getenv('PYTEST_CURRENT_TEST')
     now_test_case=re.search(r'(.*) \(.*\)',now_test_case).group(1)
     # 'test_lan.py::test_current (setup)'
+
+    # each test will count and save the file to count.txt
+    # compare list in test_item_original.txt specific number with count number,
+    # if the same means test starting from the square, or they test with special test items.
     if not os.path.exists('count.txt'):
         with open('count.txt','w') as file:
             file.write('0')
@@ -40,10 +45,17 @@ def final():
     items_collection.data_collection()
 
     yield None
+
+    # after item test is finished, the following is going to test.
+
+    # compare count number with the file test_item_original.txt list, if they are the same
     compare_result = comparison()
+
+    # record how many test items remain, if ==0 means all test is finished.
     with open('.\\test_item.txt','r') as file:
         re=file.readlines()
 
+    # if test_item.txt has no test item, and compare_result is FALSE, it means all items are finished.
     if len(re) >0 and compare_result:
         items=re[0].replace('\n','')
         del re[0]
@@ -51,12 +63,18 @@ def final():
             file.writelines(re)
         print('\ntest item=', items)
         # pytest.main(['-vs', items, '--alluredir=.\\report'])
-        subprocess.Popen(f'pytest -vs {items} --alluredir=.\\report')
+        sub=subprocess.Popen(f'pytest -vs {items} --alluredir=.\\report')
+        sub.wait()
+        sub.kill()
 
     else:
         os.unlink('.\\count.txt')
         os.unlink('.\\test_item.txt')
         os.unlink('.\\test_item_original.txt')
+        temp_file=os.listdir('.\\temp')
+        for i in temp_file:
+            os.unlink(f'.\\temp\\{i}')
+
 
         # pytest.exit('All test items are finished, so exit the test.')
 
