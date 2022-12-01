@@ -56,12 +56,19 @@ def data_collection():
             if len(content) == 0:
                 break
 
+
+        # delete the first test item, because the first item will launch automatically at first test by pytest command
+        with open('.\\test_item.txt', 'r') as file:
+            re = file.readlines()
+
+        with open('.\\test_item_original.txt', 'w') as file:
+            file.writelines(re)
+
+        with open('.\\test_item.txt', 'w') as file:
+            del re[0]
+            file.writelines(re)
+
     else:
         print('The test_item.txt exists, so skip to collect test item info.')
-
-    #delete the first test item, because the first item will launch automatically at first test by pytest command
-    with open('.\\test_item.txt','r') as file:
-        re=file.readlines()
-        del re[0]
-    with open('.\\test_item.txt','w') as file:
-        file.writelines(re)
+# if __name__ == '__main__':
+#     data_collection()
