@@ -1,4 +1,5 @@
 import socket,subprocess,datetime,time,pickle,re,pytest,os,requests,sys,re
+import allure
 import bios_update
 from common_func import *
 intel_lan_controller_type=[
@@ -147,40 +148,9 @@ def device_wol_manage_action(name,require):
 
 
 def item_total_path():
-    # aa= os.getenv('PYTEST_CURRENT_TEST')
-    return re.search('(.*) \(call\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
+    return re.search(r'(.*) \(call\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
     # return re.search('(.*)\[.*\]',name).group(1)
 
-def test_11(request):
-    # name = item_name_filter(request.node.name)
-    # # start changing bios setting
-    # data = ActManage(name, item)
-    #
-    # # disable lan2 chip
-    # data_re = data.bios_set([intel_wakeonlan_type[1], 'Enabled', 'item']).act()
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-    data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
-    data.bios_set([]).act()
-
-    assert 1==1
-
-
-def test_22(request):
-    # name = item_name_filter(request.node.name)
-    # # start changing bios setting
-    # data = ActManage(name, item)
-    #
-    # # disable lan2 chip
-    # data_re = data.bios_set([intel_wakeonlan_type[1], 'Enabled', 'item']).act()
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-    data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
-    data.bios_set([]).act()
-
-    assert 1 == 1
 
 # @pytest.mark.skip('aaa')
 # def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_get):
@@ -555,33 +525,60 @@ def test_22(request):
 #
 
 
-class TestOther:
-    def test_12(self,request):
-        aa=item_total_path()
-        data = ActManage(item_total_path(), request.node.name)
-        # data.bios_set([None, None, 'default']).act()
-        data.bios_set([]).act()
-        assert 11==11
-
-def test_44(request):
+def test_11(request):
+    # name = item_name_filter(request.node.name)
+    # # start changing bios setting
+    # data = ActManage(name, item)
+    #
+    # # disable lan2 chip
+    # data_re = data.bios_set([intel_wakeonlan_type[1], 'Enabled', 'item']).act()
+    # if not data_re[0]:
+    #     pytest.skip(data_re[1])
     data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
-    data.bios_set([]).act()
-    assert 11==11
+    data.bios_set([None, None, 'default']).act()
+    # data.bios_set([]).act()
+    assert 1==1
 
-def test_current(request):
+
+def test_22(request):
+    # name = item_name_filter(request.node.name)
+    # # start changing bios setting
+    # data = ActManage(name, item)
+    #
+    # # disable lan2 chip
+    # data_re = data.bios_set([intel_wakeonlan_type[1], 'Enabled', 'item']).act()
+    # if not data_re[0]:
+    #     pytest.skip(data_re[1])
+
+    
     data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
-    data.bios_set([]).act()
-    assert 11 == 11
-    # print(os.getenv('PYTEST_CURRENT_TEST'))
-
-
-
-# if __name__ == '__main__':
+    data.bios_set([None, None, 'default']).act()
+    # data.bios_set([]).act()
+    with allure.step('test title'):
+        print('i am good.')
+    assert 1 == 1
 #
-#     pytest.exit()
-
+# class TestOther:
+#     def test_12(self,request):
+#         aa=item_total_path()
+#         data = ActManage(item_total_path(), request.node.name)
+#         data.bios_set([None, None, 'default']).act()
+#         # data.bios_set([]).act()
+#         assert 11==11
+#
+# def test_44(request):
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([None, None, 'default']).act()
+#     # data.bios_set([]).act()
+#     assert 11==11
+#
+# def test_current(request):
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([None, None, 'default']).act()
+#     # data.bios_set([]).act()
+#     assert 11 == 11
+#     # print(os.getenv('PYTEST_CURRENT_TEST'))
+#
 
 
 
