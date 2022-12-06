@@ -1,5 +1,5 @@
-import subprocess, re, os
-res=subprocess.Popen('pytest --co',stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+import subprocess, re, os, sys
+
 
 class Data:
     def __init__(self):
@@ -40,8 +40,23 @@ class Org:
                 # print(f'{self.data.module}::{self.data.cclass}::{temp}')
         except:
             pass
-def data_collection():
 
+
+def data_collection():
+    # collect how many test items are commanded from user, start collecting all the command line
+    argv = sys.argv
+    result = []
+    command = ''
+    for i in argv:
+        if '.py' in i:
+            result.append(i)
+
+    for i in result:
+        command = command + ' ' + i
+    res = subprocess.Popen(f'pytest --co {command}', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    # ==================================================================================
+    # start organizing all need test items and save to test_item.txt for further usage
     data=Data()
     org = Org(data)
     print('Start collecting all test item info and write to test_item.txt....')
@@ -70,5 +85,6 @@ def data_collection():
 
     else:
         print('The test_item.txt exists, so skip to collect test item info.')
+
 # if __name__ == '__main__':
 #     data_collection()

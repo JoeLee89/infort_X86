@@ -1,6 +1,10 @@
-import subprocess,os,sys,pytest,time
+import subprocess,os,sys,pytest,time, re
 import bios_update
 from abc import ABC,abstractmethod
+
+def item_total_path():
+    return re.search(r'(.*) \(call\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
+
 
 def cmd(command):
     subp=subprocess.Popen(command,shell=True)
@@ -45,7 +49,6 @@ class Process(ABC):
 #             print('Assigned item=', self.item)
 #             print('Function name=', self.name)
 #             return [False, f'The function is not selected. so far the function={self.item}']
-
 
 
 class Bios(Process):

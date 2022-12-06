@@ -147,11 +147,6 @@ def device_wol_manage_action(name,require):
     main.close()
 
 
-def item_total_path():
-    return re.search(r'(.*) \(call\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
-    # return re.search('(.*)\[.*\]',name).group(1)
-
-
 # @pytest.mark.skip('aaa')
 # def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_get):
 #     # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
@@ -300,9 +295,8 @@ def item_total_path():
 # def test_lan2_surf_web(request, item,lan_device_number_get):
 #     name = item_name_filter(request.node.name)
 #     data = ActManage(name, item)
-#     data_re = data.bios_set([None, None, 'default']).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+#     data.bios_set([None, None, 'default']).act()
+
 #
 #     print('it is going to disable Lan1')
 #     # disable lan1 first to make sure srufing web device is lan2
@@ -534,8 +528,8 @@ def test_11(request):
     # data_re = data.bios_set([intel_wakeonlan_type[1], 'Enabled', 'item']).act()
     # if not data_re[0]:
     #     pytest.skip(data_re[1])
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([None, None, 'default']).act()
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
     # data.bios_set([]).act()
     assert 1==1
 
@@ -551,8 +545,8 @@ def test_22(request):
     #     pytest.skip(data_re[1])
 
     
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([None, None, 'default']).act()
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
     # data.bios_set([]).act()
     with allure.step('test title'):
         print('i am good.')

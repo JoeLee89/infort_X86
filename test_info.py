@@ -2,6 +2,7 @@ import pywinauto,pytest,subprocess, time, os, allure
 import hwinfo_collect
 from pywinauto import Application
 from pywinauto import Desktop
+from common_func import *
 
 
 @pytest.fixture(scope='session')
@@ -65,7 +66,12 @@ def burnin_launch():
 def test_dummy():
     assert True
 
-def test_video_gen3(hw64info_launch):
+def test_video_gen3(hw64info_launch,request):
+    # set up bios setting to default
+    # save log file to temp, so it could remember what test item should continue after reboot.
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
+
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'
     result=None
@@ -87,7 +93,12 @@ def test_video_gen3(hw64info_launch):
             result=i
     assert target in result
 
-def test_video_gen4(hw64info_launch):
+def test_video_gen4(hw64info_launch,request):
+    # set up bios setting to default
+    # save log file to temp, so it could remember what test item should continue after reboot.
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
+
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'
     result=None
@@ -108,3 +119,48 @@ def test_video_gen4(hw64info_launch):
         if 'x16' in i:
             result=i
     assert target in result
+
+
+def test_storage(hw64info_launch,request):
+    # set up bios setting to default
+    # save log file to temp, so it could remember what test item should continue after reboot.
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
+
+    start='Drives --------------------------------------------------------------------'
+    end='Audio ---------------------------------------------------------------------'
+    mang=hwinfo_collect.Manage()
+    result=hwinfo_collect.Others()
+    mang.set_func(result)
+    mang.set_requirment(start,end)
+    speed, all = mang.act()
+    with allure.step('Storage related info'):
+        # write graphic card related data in file
+        if not os.path.exists('.\\temp\\storage.txt'):
+            with open('.\\temp\\storage.txt','a') as file:
+                for i in all:
+                    file.write(i+'\n')
+        allure.attach.file('.\\temp\\storage.txt')
+
+def test_memory(hw64info_launch,request):
+    # set up bios setting to default
+    # save log file to temp, so it could remember what test item should continue after reboot.
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([None, None, 'default']).act()
+
+    start='Memory --------------------------------------------------------------------'
+    end='Bus -----------------------------------------------------------------------'
+    mang=hwinfo_collect.Manage()
+    result=hwinfo_collect.Others()
+    mang.set_func(result)
+    mang.set_requirment(start,end)
+    speed, all = mang.act()
+    with allure.step('Memory related info'):
+        # write graphic card related data in file
+        if not os.path.exists('.\\temp\\memory.txt'):
+            with open('.\\temp\\memory.txt','a') as file:
+                for i in all:
+                    file.write(i+'\n')
+        allure.attach.file('.\\temp\\memory.txt')
+
+# pytest -vs test_info.py::test_nvme --alluredir=report

@@ -27,6 +27,18 @@ class Type(ABC):
     def act(self,data):
         pass
 
+class Others(Type):
+
+    def act(self,data):
+        all_search_result = []
+        start=data.data.index(self.title)
+        end=data.data.index(self.end_line)
+
+        for i in data.data[start:end]:
+            all_search_result.append(i)
+
+        data.search_result=all_search_result
+
 class Video(Type):
 
     def act(self,data):

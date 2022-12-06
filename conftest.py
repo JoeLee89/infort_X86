@@ -49,14 +49,15 @@ def final():
     # after item test is finished, the following is going to test.
 
     # compare count number with the file test_item_original.txt list, if they are the same
-    compare_result = comparison()
+    # compare_result = comparison()
 
     # record how many test items remain, if ==0 means all test is finished.
     with open('.\\test_item.txt','r') as file:
         re=file.readlines()
 
     # if test_item.txt has no test item, and compare_result is FALSE, it means all items are finished.
-    if len(re) >0 and compare_result:
+    # if len(re) >0 and compare_result:
+    if len(re) > 0:
         items=re[0].replace('\n','')
         del re[0]
         with open('.\\test_item.txt', 'w') as file:
@@ -68,7 +69,7 @@ def final():
         sub.kill()
 
     else:
-        os.unlink('.\\count.txt')
+        # os.unlink('.\\count.txt')
         os.unlink('.\\test_item.txt')
         os.unlink('.\\test_item_original.txt')
         temp_file=os.listdir('.\\temp')
