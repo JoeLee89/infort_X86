@@ -131,10 +131,10 @@ class Reboot(Process):
             # return self.next_duty.act()
 
             #if the test item has rebooted before, then should delete the run.bat batch file
-            try:
-                os.unlink(f'{self.auto_location}run.bat')
-            except FileNotFoundError:
-                print('There is no file in auto start folder.')
+            # try:
+            #     os.unlink(f'{self.auto_location}run.bat')
+            # except FileNotFoundError:
+            #     print('There is no file in auto start folder.')
 
 
 # check if the test item has been tested or not.

@@ -201,9 +201,20 @@ class Action:
 # act.set_item('Quiet Boot1', '0','value')
 # act.action()
 
+
+
 # act=Action()
-# act.set_item('BIOS Lock', 'Enabled','item')
+# act.set_item('RTC Wake system from S5', 'Enabled','item')
 # act.action()
+#
+# act=Action()
+# act.set_item('Wake up minute', '2','value')
+# act.action()
+
+# act=Action()
+# act.set_item('Wake up second', '<30>','value')
+# act.action()
+
 #
 # act=Action()
 # act.set_item('RTC Lock', 'Enabled','item')

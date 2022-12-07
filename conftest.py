@@ -70,12 +70,17 @@ def final():
 
     else:
         # os.unlink('.\\count.txt')
-        os.unlink('.\\test_item.txt')
-        os.unlink('.\\test_item_original.txt')
-        temp_file=os.listdir('.\\temp')
-        for i in temp_file:
-            os.unlink(f'.\\temp\\{i}')
-
+        try:
+            startup_bat_path = os.path.expanduser(
+                '~') + '\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\run.bat'
+            os.unlink('.\\test_item.txt')
+            os.unlink('.\\test_item_original.txt')
+            os.unlink(startup_bat_path)
+            temp_file=os.listdir('.\\temp')
+            for i in temp_file:
+                os.unlink(f'.\\temp\\{i}')
+        except Exception as a:
+            print('Error occure:', a)
 
         # pytest.exit('All test items are finished, so exit the test.')
 
