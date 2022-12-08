@@ -76,11 +76,12 @@ class Bios(Process):
         if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
             self.bios_update_default()
-            self.bios.set_item(self.bios_setting[0], self.bios_setting[1], self.bios_setting[2])
-        try:
-            self.bios.action()
-        except LookupError:
-            pytest.skip('can not find the assigned BIOS title, so will skip the test.')
+            for bios_setting in self.bios_setting:
+                self.bios.set_item(bios_setting[0], self.bios_setting[1], self.bios_setting[2])
+                try:
+                    self.bios.action()
+                except LookupError:
+                    pytest.skip('can not find the assigned BIOS title, so will skip the test.')
 
         return self.next_duty.act()
 
@@ -212,3 +213,9 @@ class ActManage:
 # data = ActManage('abc', 'all')
 # data.bios_set([]).act()
 # print(re)
+
+
+# data = ActManage('abc', 'all')
+# data.bios_set([[None, None, 'default'],
+#                ['RTC Wake system from S5', 'Enabled','item'],
+#                ['Wake up minute', '2','value']]).act()
