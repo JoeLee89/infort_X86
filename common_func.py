@@ -69,7 +69,7 @@ class Bios(Process):
         self.bios_setting=content
 
     def act(self):
-        if len(self.bios_setting) == 0:
+        if len(self.bios_setting[0]) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
         # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):

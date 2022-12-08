@@ -170,9 +170,9 @@ def device_wol_manage_action(name,require):
 #
 #     #disable lan2 chip
 #     if 'intel' in result:
-#         data.bios_set([intel_wakeonlan_type[lan_number], bios_status, 'item']).act()
+#         data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
 #     else:
-#         data.bios_set([realtek_wakeonelan_type[lan_number], bios_status, 'item']).act()
+#         data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 #
 #     #confirm the data_re returned list
 #     # if not data_re[0]:
@@ -232,9 +232,9 @@ def device_wol_manage_action(name,require):
 #
 #     #disable lan2 chip
 #     if 'intel' in result:
-#         data.bios_set([intel_wakeonlan_type[lan_number], bios_status, 'item']).act()
+#         data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
 #     else:
-#         data.bios_set([realtek_wakeonelan_type[lan_number], bios_status, 'item']).act()
+#         data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 #
 #     #confirm the data_re returned list
 #     # if not data_re[0]:
@@ -352,7 +352,7 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 
 # def test_lan1_surf_web(request, lan_device_number_get):
 #     data = ActManage(item_total_path(), request.node.name)
-#     data.bios_set([None, None, 'default']).act()
+#     data.bios_set([[None, None, 'default']]).act()
 #
 #     print('it is going to disable Lan2')
 #     #disable lan2 first to make sure srufing web device is lan1
@@ -372,9 +372,9 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 
 
 # def test_lan2_surf_web(request, item,lan_device_number_get):
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
-#     data.bios_set([None, None, 'default']).act()
+#
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([[None, None, 'default']]).act()
 
 #
 #     print('it is going to disable Lan1')
@@ -393,11 +393,10 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert _re.status_code == 200
 #
 # def test_lan1_download_file(request, item, lan_device_number_get):
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
-#     data_re = data.bios_set([None, None, 'default']).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+#
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([[None, None, 'default']]).act()
+
 #
 #     print('it is going to disable Lan2')
 #     #disable lan2 first to make sure srufing web device is lan1
@@ -412,11 +411,10 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert content == 10485760
 #
 # def test_lan2_download_file(request, item, lan_device_number_get):
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
-#     data_re = data.bios_set([None, None, 'default']).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+#
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([None, None, 'default']).act()
+
 #
 #     print('it is going to disable Lan1')
 #     # disable lan1 first to make sure srufing web device is lan2
@@ -431,11 +429,10 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert content == 10485760
 #
 # def test_s3(request, item):
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
-#     data_re=data.bios_set([]).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([[]]).act()
+
 #     command='wmic nic where netEnabled=true get name, speed'
 #     _re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 #     lan_chip=['intel','realtek']
@@ -466,11 +463,10 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert first == second
 #
 # def test_s4(request, item):
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
-#     data_re=data.bios_set([]).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+
+#     data = ActManage(item_total_path(), request.node.name)
+#     data.bios_set([]).act()
+
 #     command='wmic nic where netEnabled=true get name, speed'
 #     _re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 #     lan_chip=['intel','realtek']
@@ -528,14 +524,12 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #         print(before)
 #
 #     # start changing bios setting
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
+
+#     data = ActManage(item_total_path(), request.node.name)
 #     if 'intel' in before:
-#         data_re = data.bios_set([intel_lan_controller_type[0], 'Disabled', 'item']).act()
+#         data.bios_set([[intel_lan_controller_type[0], 'Disabled', 'item']]).act()
 #     else:
-#         data_re = data.bios_set([realtek_lan_controller_type[0], 'Disabled', 'item']).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+#         data.bios_set([[realtek_lan_controller_type[0], 'Disabled', 'item']]).act()
 #
 #     # read all lan info, after bios item is changed.
 #     _re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -575,14 +569,12 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #         print(before)
 #
 #     #start changing bios setting
-#     name = item_name_filter(request.node.name)
-#     data = ActManage(name, item)
+
+#     data = ActManage(item_total_path(), request.node.name)
 #     if 'intel' in before:
-#         data_re=data.bios_set([intel_lan_controller_type[1], 'Disabled', 'item']).act()
+#         data.bios_set([[intel_lan_controller_type[1], 'Disabled', 'item']]).act()
 #     else:
-#         data_re=data.bios_set([realtek_lan_controller_type[1], 'Disabled', 'item']).act()
-#     if not data_re[0]:
-#         pytest.skip(data_re[1])
+#         data.bios_set([[realtek_lan_controller_type[1], 'Disabled', 'item']]).act()
 #
 #     #read all lan info, after bios item is changed.
 #     _re = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
