@@ -372,10 +372,8 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 
 
 # def test_lan2_surf_web(request, item,lan_device_number_get):
-#
 #     data = ActManage(item_total_path(), request.node.name)
 #     data.bios_set([[None, None, 'default']]).act()
-
 #
 #     print('it is going to disable Lan1')
 #     # disable lan1 first to make sure srufing web device is lan2
@@ -393,10 +391,8 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert _re.status_code == 200
 #
 # def test_lan1_download_file(request, item, lan_device_number_get):
-#
 #     data = ActManage(item_total_path(), request.node.name)
 #     data.bios_set([[None, None, 'default']]).act()
-
 #
 #     print('it is going to disable Lan2')
 #     #disable lan2 first to make sure srufing web device is lan1
@@ -411,11 +407,9 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert content == 10485760
 #
 # def test_lan2_download_file(request, item, lan_device_number_get):
-#
 #     data = ActManage(item_total_path(), request.node.name)
-#     data.bios_set([None, None, 'default']).act()
+#     data.bios_set([[None, None, 'default']]).act()
 
-#
 #     print('it is going to disable Lan1')
 #     # disable lan1 first to make sure srufing web device is lan2
 #     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=disabled')
@@ -429,9 +423,8 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 #     assert content == 10485760
 #
 # def test_s3(request, item):
-
 #     data = ActManage(item_total_path(), request.node.name)
-#     data.bios_set([[]]).act()
+#     data.bios_set([[None, None, 'default']]).act()
 
 #     command='wmic nic where netEnabled=true get name, speed'
 #     _re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -465,7 +458,7 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
 # def test_s4(request, item):
 
 #     data = ActManage(item_total_path(), request.node.name)
-#     data.bios_set([]).act()
+#     data.bios_set([[None, None, 'default']]).act()
 
 #     command='wmic nic where netEnabled=true get name, speed'
 #     _re=subprocess.Popen(command,shell=True,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
