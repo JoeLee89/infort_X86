@@ -77,7 +77,7 @@ class Bios(Process):
             # act.set_item('i219 Wake on LAN', 'Disabled', 'item')
             self.bios_update_default()
             for bios_setting in self.bios_setting:
-                self.bios.set_item(bios_setting[0], self.bios_setting[1], self.bios_setting[2])
+                self.bios.set_item(bios_setting[0], bios_setting[1], bios_setting[2])
                 try:
                     self.bios.action()
                 except LookupError:
