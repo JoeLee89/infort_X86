@@ -1,5 +1,6 @@
 import pytest,items_collection,os,subprocess,re
 
+
 # def pytest_addoption(parser):
 #     parser.addoption('--item',action='store',default='all',help='input the function name you need to test, or input all for all items')
 #
@@ -11,6 +12,7 @@ import pytest,items_collection,os,subprocess,re
 #     if 'item' in metafunc.fixturenames and option_value is not None:
 #         metafunc.parametrize('item',[option_value])
 #
+
 
 def comparison():
     # get now test case name, and delete no needed strings
@@ -78,6 +80,7 @@ def final():
             os.unlink(startup_bat_path)
             temp_file=os.listdir('.\\temp')
             for i in temp_file:
+                print('delete ffile', 'i')
                 os.unlink(f'.\\temp\\{i}')
         except Exception as a:
             print('Error occure:', a)

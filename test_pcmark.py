@@ -1,12 +1,19 @@
-from tools_manage import InstallManage as im
 from pywinauto.application import Application
 import pywinauto
-import os,time,psutil
+import os,time,psutil,pytest,allure
 import xml.etree.ElementTree as ET
+from tools_manage import *
+from common_func import *
 performanceitem=['pcmark_score','lightweight_score','productivity_score','entertainment_score','creativity_score','computation_score','system_storage_score','raw_system_storage_score']
+folder='performance'
 
 def filewriting(content):
-    testresult = open('PCMark10_performance_result.csv', 'a')
+
+    try:
+        os.mkdir(f'.\\{folder}')
+    except:
+        print('file exits, so skip create performance folder.')
+    testresult = open(f'.\\{folder}\\PCMark10_performance_result.csv', 'a')
     testresult.write(content)
     testresult.close()
 
@@ -56,10 +63,15 @@ def xmlcheck():
                 print(child.tag + ',', child.text)
 
 
-def test_pcmark():
-    re = im.set_name('3dmark')
-    if re:
-        launchapp()
+def test_pcmark(request):
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
-    else:
-        raise Warning('Tool installation is failed.')
+    re = InstallManage().set_name('crystaldiskmark')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
+
+    launchapp()
+    if os.path.exists(f'.\\{folder}\\PCMark10_performance_result.cs'):
+        with allure.step('Performance Result'):
+            allure.attach.file(f'.\\{folder}\\PCMark10_performance_result.csv')

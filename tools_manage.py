@@ -2,6 +2,8 @@ from abc import ABC,abstractmethod
 import shutil
 import os,re,time
 import subprocess
+import pywinauto
+from pywinauto.application import Application
 
 class SW:
     def __init__(self):
@@ -40,7 +42,7 @@ class Futuremark_ThreeDMark(SW):
                 print('The installation got something wrong.')
                 return False
             else:
-                print('the installation is finished')
+                print('The installation is finished')
                 self.registry()
                 return True
         else:
@@ -132,18 +134,93 @@ class Burnintest(SW):
             return False
         else:
             print('the installation is finished')
-            os.kill('bit.exe',)
+            os.system('taskkill /F /IM bit.exe')
             self.registry()
             return True
 
 
     def registry(self):
-        shutil.copy(self.sour_url + self.name + 'key.dat','C:\\Program Files\\BurnInTest')
+        shutil.copy(self.sour_url + self.name + '\\' + 'key.dat','C:\\Program Files\\BurnInTest')
         if os.path.exists('C:\\Program Files\\BurnInTest\\key.dat'):
             print('the registration is finished')
         else:
             print('The registration got something wrong.')
             print('Can not get the key.dat file in the burnin test folder')
+
+class Sandra(SW):
+    def __init__(self):
+        super().__init__()
+        self.name='sandra'
+
+    def search_file(self):
+        file = os.listdir(r'.\tool\sandra')
+        target = ''
+        for i in file:
+            try:
+                target = re.search(r'(.*.exe)', i).group(1)
+            except:
+                pass
+        return target
+
+    def install(self):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url+self.name)
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+
+        file_name=self.search_file()
+        if file_name == '':
+            print('Look like there is not related execute file in the folder. skip the installation.')
+            return False
+        print('Please wait, while the installation is processing.')
+        process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent ',shell=True)
+        re=process.wait()
+        time.sleep(15)
+        if re>0:
+            print('The installation got something wrong.')
+            return False
+        else:
+            print('the installation is finished')
+            self.registry()
+            return True
+
+
+    def registry(self):
+        with open(f'{self.des_url}sandra\\sn.txt') as file:
+            sn=file.readlines()
+        app_path = 'C:\\Program Files\\SiSoftware'
+        target_folder = os.listdir(app_path)
+        app = Application().start(cmd_line=f'{app_path}\\{target_folder[0]}\\sandra.exe')
+        app['Register']['Edit'].type_keys(sn[0])
+        app['Register'].type_keys('{ENTER}')
+        try:
+            app[u'Local Computer - SiSoftware Sandra'].wait('exists', timeout=10)
+            print('the registration is finished')
+        except pywinauto.timings.TimeoutError:
+            print('The registration got something wrong.')
+        finally:
+            app.kill()
+
+
+class CrystalDiskMark(SW):
+    def __init__(self):
+        super().__init__()
+        self.name='crystaldiskmark'
+
+    def install(self):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url+self.name)
+                print('the installation is finished')
+                return True
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+
 
 
 class InstallManage:
@@ -152,26 +229,31 @@ class InstallManage:
 
     @staticmethod
     def set_name(name):
+        re=False
         if name == '3dmark':
             sw = Futuremark_ThreeDMark()
             re = sw.install()
 
-        elif name == 'pcmark10':
+        elif name == 'pcmark':
             sw = Futuremark_PCMark()
             re = sw.install()
 
         elif name=='sandra':
-            sw = Futuremark_PCMark()
+            sw = Sandra()
             re = sw.install()
 
         elif name=='burnintest':
             sw = Burnintest()
             re = sw.install()
 
+        elif name=='crystaldiskmark':
+            sw = CrystalDiskMark()
+            re = sw.install()
+
         return re
 
 
-InstallManage().set_name('burnintest')
+# InstallManage().set_name('crystaldiskmark')
 
 
 

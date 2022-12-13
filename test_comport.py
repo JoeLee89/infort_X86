@@ -17,7 +17,7 @@ class Data:
         self.comport_parity = [serial.PARITY_EVEN, serial.PARITY_ODD, serial.PARITY_MARK, serial.PARITY_SPACE]
 
     def comport_list(self):
-        re=list_ports.grep(r'通訊連接埠')
+        re=list_ports.grep(r'Communications Port')
         for i in re:
             self.comport_name_list.append(i.device)
         return self.comport_name_list
@@ -155,7 +155,6 @@ class Test_Loopback:
             assert self.s.dtr == self.s.ri
             print(f'PASS: {ports} DTR/DSR/RI status matchs, while set DTR->{value}')
 
-    @pytest.mark.skip()
     def test_ACPI_S3(self):
         process=subprocess.Popen(r'.\tool\Sleeper\sleeper -S0010 -R 30 -N 1 -E',shell=True)
         process.wait()
@@ -167,7 +166,6 @@ class Test_Loopback:
             for write, read in re:
                 assert write == read, "Confirm if write = read data, and read=%s , write=%s" % (write, read)
 
-    @pytest.mark.skip()
     def test_ACPI_S4(self):
         process=subprocess.Popen(r'.\tool\Sleeper\sleeper -S0001 -R 30 -N 1 -E',shell=True)
         process.wait()

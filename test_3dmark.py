@@ -1,15 +1,19 @@
-from tools_manage import InstallManage as im
-from pywinauto.application import Application
-import pywinauto
-import os,time,psutil
+import os,time,psutil,pytest,allure
 import xml.etree.ElementTree as ET
+from common_func import *
+from tools_manage import *
 
 performanceitem=['firestrike_extreme','firestrike_ultra','timespy','timespy_extreme']
-# performanceitem=['timespy']
-
+folder='performance'
 
 def filewriting(content):
-    testresult = open('3DMark_performance_result.csv', 'a')
+
+    try:
+        os.mkdir(f'.\\{folder}')
+    except:
+        print('file exits, so skip create performance folder.')
+
+    testresult = open(f'.\\{folder}\\3DMark_performance_result.csv', 'a')
     testresult.write(content)
     testresult.close()
 
@@ -83,10 +87,15 @@ def xmlcheck():
                     filewriting(child.tag + ',' + child.text+ '\n')
                     print(child.tag + ',', child.text)
 
-def test_3dmark():
+def test_3dmark(request):
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
+    re = InstallManage().set_name('3dmark')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
 
-    re=im.set_name('3dmark')
-    if re:
-        launch3dmark()
-    else:
-        raise Warning('Tool installation is failed.')
+    launch3dmark()
+
+    if os.path.exists(f'.\\{folder}\\3DMark_performance_result.csv'):
+        with allure.step('Performance Result'):
+            allure.attach.file(f'.\\{folder}\\3DMark_performance_result.csv')

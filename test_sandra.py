@@ -2,7 +2,10 @@ import os
 from pywinauto.application import Application
 import pywinauto
 import time
-import pytest
+from tools_manage import *
+import pytest, allure
+from common_func import *
+from tools_manage import *
 
 
 #pywinauto.timings.Timings.slow()
@@ -22,10 +25,16 @@ needitem=['<<< Processor Arithmetic >>>',
           '<<< Cache & Memory Latency >>>',
           '<<< Cache Bandwidth >>>',
           '<<< Memory Transaction Throughput >>>']
-
+folder='performance'
 
 def writing():
-    performancefile=open('sandra_performance_result.csv','a')
+
+    try:
+        os.mkdir(f'.\\{folder}')
+    except:
+        print('file exits, so skip create performance folder.')
+
+    performancefile=open(f'.\\{folder}\\sandra_performance_result.csv','a')
     while True:
         global content
         global repeat
@@ -66,10 +75,8 @@ def mainloopforsandra():
         print("Can't find the file sandra_benchmark_report.txt")
 
 
-
-
-def sandralaunch():
-    app=Application(backend="win32").start(cmd_line='C:\Program Files\SiSoftware\SiSoftware Sandra Tech Support (Engineer) Titanium.RTMb\sandra.exe')
+def sandralaunch(folder):
+    app=Application(backend="win32").start(cmd_line=f'{folder}\\sandra.exe')
     dlg_spec=app['LocalComputer - SiSoftware Sandra']
     dlg_spec.wait('exists',timeout=50)
     app['Tip of the Day'].wait('exists',timeout=30)
@@ -125,11 +132,24 @@ def sandralaunch():
 
 
 
-def test_sandra():
-    if os.path.exists("C:\Program Files\SiSoftware\SiSoftware Sandra Tech Support (Engineer) Titanium.RTMb"):
-        sandralaunch()
+def test_sandra(request):
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
+
+    re=InstallManage().set_name('sandra')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
+
+    target_folder=os.listdir('C:\\Program Files\\SiSoftware')[0]
+    target_folder='C:\\Program Files\\SiSoftware\\' + target_folder
+    if os.path.exists(target_folder):
+        sandralaunch(target_folder)
         mainloopforsandra()
         print('Santra performance is finished.')
     else:
-        raise Warning('Can not fine the related Sandra folder name, please check.')
+        pytest.skip('Can not fine the related Sandra folder name, please check.')
+
+    if os.path.exists(f'.\\{folder}\\sandra_performance_result.csv'):
+        with allure.step('Performance Result'):
+            allure.attach.file(f'.\\{folder}\\sandra_performance_result.csv')
 

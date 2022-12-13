@@ -1,11 +1,19 @@
 import pywinauto.element_info
 from pywinauto.application import Application
-import time,os,pytest
+import time,os,pytest,allure
+from common_func import *
+from tools_manage import *
 i=0
-
+folder='performance'
+item=None
+app=None
 
 def filewriting(content):
-    testresult = open('CrystalDiskMark_performance_result.csv', 'a')
+    try:
+        os.mkdir(f'.\\{folder}')
+    except:
+        print('file exits, so skip create performance folder.')
+    testresult = open(f'.\\{folder}\\CrystalDiskMark_performance_result.csv', 'a')
     testresult.write(content)
     testresult.close()
 
@@ -13,10 +21,8 @@ def capture():
     global i
     global app
     img = app['CrystalDiskMark.*'].capture_as_image()
-    img.save('ASSD_%s.jpg' %i)
+    img.save(f'.\\{folder}\\CrystalDiskMark_%s.jpg' %i)
     i+=1
-
-
 
 
 def launchassd():
@@ -126,10 +132,16 @@ def launchassd():
 
 
 
-def test_crystalmark():
-    global item
-    global app
-    app = Application().start(cmd_line=r'..\tool\CrystalDiskMark\DiskMark64.exe')
+def test_crystalmark(request):
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
+
+    re=InstallManage().set_name('crystaldiskmark')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
+
+
+    app = Application().start(cmd_line=r'.\tool\CrystalDiskMark\DiskMark64.exe')
     # app = Application().start(cmd_line=r'notepad.exe')
     # handle=pywinauto.findwindows.find_window(best_match='CrystalDiskMark')
     # app=Application().connect(handle=handle)
@@ -138,6 +150,13 @@ def test_crystalmark():
     # app['CrystalDiskMark'].menu_select('檔案(&F) -> 開新檔案(&N)	Ctrl+N')
 
     launchassd()
+    app.kill()
+
+    if os.path.exists(f'.\\{folder}\\CrystalDiskMark_performance_result.csv'):
+        with allure.step('Performance Result'):
+            allure.attach.file(f'.\\{folder}\\CrystalDiskMark_performance_result.csv')
+
+
 
 
 
