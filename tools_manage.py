@@ -22,8 +22,12 @@ class SW:
 class Futuremark_ThreeDMark(SW):
     def __init__(self):
         super().__init__()
-        self.name='3DMark'
-        self.reg='3DM-PICFT-3MJ7T-DCLLC-C9M6W-6NKME'
+        self.name='3dmark'
+        try:
+            with open(self.des_url+self.name+'\\'+ 'sn.txt') as file:
+                self.reg=file.readlines()[0]
+        except FileNotFoundError:
+            self.reg='3DM-PICFT-3MJ7T-DCLLC-C9M6W-6NKME'
 
     def install(self):
         if not self.check(self.name):
@@ -42,22 +46,28 @@ class Futuremark_ThreeDMark(SW):
                 print('The installation got something wrong.')
                 return False
             else:
+                re=self.registry()
                 print('The installation is finished')
-                self.registry()
-                return True
+                return True if re else False
         else:
             return True
 
-
     def registry(self):
-        process=subprocess.Popen(f'c:\\3DMark\\3DMarkCmd.exe --register={self.reg}')
-        re=process.wait()
-        # print('re=',re)
-        if re>0:
-            print('The registration got something wrong.')
+        process=subprocess.Popen(f'c:\\{self.name}\\3DMarkCmd.exe --register={self.reg}', stdout=subprocess.PIPE)
+        reg_result=process.stdout.readlines()
+        re=True
+        for i in reg_result:
+            mesg='could not get hashed key'
+            if mesg in i.decode('utf8'):
+               re=False
 
-        else:
+        if re:
             print('the registration is finished')
+        else:
+            print('The registration got something wrong.')
+        return True
+
+
 
 class Futuremark_PCMark(SW):
     def __init__(self):
@@ -253,7 +263,7 @@ class InstallManage:
         return re
 
 
-# InstallManage().set_name('crystaldiskmark')
+# InstallManage().set_name('3dmark')
 
 
 
