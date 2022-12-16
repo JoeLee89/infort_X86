@@ -24,11 +24,13 @@ def filewriting(content):
     testresult.write(content)
     testresult.close()
 
+
 def processtokill():
     for proc in psutil.process_iter():
         print(proc.name)
         if 'PCMark' in str(proc.name):
             proc.kill()
+
 
 def launchapp():
     xml_file_path = f'{os.getcwd()}\\performance\\pcmark10.xml'

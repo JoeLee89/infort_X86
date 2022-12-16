@@ -204,13 +204,21 @@ class Sandra(SW):
         app_path = 'C:\\Program Files\\SiSoftware'
         target_folder = os.listdir(app_path)
         app = Application().start(cmd_line=f'{app_path}\\{target_folder[0]}\\sandra.exe')
-        app['Register']['Edit'].type_keys(sn[0])
-        app['Register'].type_keys('{ENTER}')
+        try:
+            app['Register'].wait('exists', 15)
+            app['Register']['Edit'].type_keys(sn[0])
+            app['Register'].type_keys('{ENTER}')
+        except:
+            pass
+
         try:
             app[u'Local Computer - SiSoftware Sandra'].wait('exists', timeout=10)
             print('the registration is finished')
-        except pywinauto.timings.TimeoutError:
+            return True
+        except (pywinauto.timings.TimeoutError, pywinauto.findbestmatch.MatchError):
             print('The registration got something wrong.')
+            return False
+
         finally:
             app.kill()
 

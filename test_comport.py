@@ -156,7 +156,7 @@ class Test_Loopback:
             print(f'PASS: {ports} DTR/DSR/RI status matchs, while set DTR->{value}')
 
     def test_ACPI_S3(self):
-        process=subprocess.Popen(r'.\tool\Sleeper\sleeper -S0010 -R 30 -N 1 -E',shell=True)
+        process=subprocess.Popen(r'.\tool\sleeper\sleeper.exe -S0010 -R 30 -N 1 -E',shell=True)
         process.wait()
         for ports in self.comportlist:
             self.s.baudrate = self.data.default_speed
@@ -167,7 +167,7 @@ class Test_Loopback:
                 assert write == read, "Confirm if write = read data, and read=%s , write=%s" % (write, read)
 
     def test_ACPI_S4(self):
-        process=subprocess.Popen(r'.\tool\Sleeper\sleeper -S0001 -R 30 -N 1 -E',shell=True)
+        process=subprocess.Popen(r'.\tool\sleeper\sleeper.exe -S0001 -R 30 -N 1 -E',shell=True)
         process.wait()
         for ports in self.comportlist:
             self.s.baudrate = self.data.default_speed
