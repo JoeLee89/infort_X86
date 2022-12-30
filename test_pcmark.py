@@ -34,11 +34,11 @@ def processtokill():
 
 def launchapp():
     xml_file_path = f'{os.getcwd()}\\performance\\pcmark10.xml'
-    if os.path.exists("C:\\Program Files\\UL\\PCMark 10"):
+    if os.path.exists("C:\\PCMark 10"):
         app = Application(backend="win32").start(
-            cmd_line=f'C:\\Program Files\\UL\PCMark 10\\pcmark10cmd.exe --systeminfo=on --all=on --secondarystorage=off --export={xml_file_path}',
+            cmd_line=f'C:\\PCMark 10\\pcmark10cmd.exe --definition=pcm10_benchmark.pcmdef --export-xml={xml_file_path}',
             wait_for_idle=False)
-        appp = Application(backend="win32").connect(path=r'C:\Program Files\UL\PCMark 10\pcmark10cmd.exe')
+        appp = Application(backend="win32").connect(path=r'C:\PCMark 10\pcmark10cmd.exe')
         i = 0
         while True:
             time.sleep(5)
@@ -54,27 +54,32 @@ def launchapp():
         time.sleep(10)
         xmlcheck()
     else:
-        print("Can't find the PCMARK10 folder. Check if 3Dmark app is installed well.")
+        print("Can't find the PCMARK10 folder. Check if app is installed well.")
 
 
 def xmlcheck():
-    for i in performanceitem:
-         #print('%s\\%s_performance.xml' % (os.getcwd(), i))
-        if os.path.exists(f'.\\performance\\pcmark10.xml'):
-            tree = ET.parse(f'.\\performance\\pcmark10.xml')
-            root = tree.getroot()
-            for child in root.iter(i):
-                filewriting(child.tag + ',' + child.text + '\n')
-                print(child.tag + ',', child.text)
+    # for i in performanceitem:
+    #      #print('%s\\%s_performance.xml' % (os.getcwd(), i))
+    if os.path.exists(f'.\\performance\\pcmark10.xml'):
+        tree = ET.parse(f'.\\performance\\pcmark10.xml')
+        root = tree.getroot()
+        for child in root[0][0][5:-1]:
+            filewriting(child.tag + ',' + child.text + '\n')
+            print(child.tag + ',', child.text)
+        for child in root[0][1][5:-1]:
+            filewriting(child.tag + ',' + child.text + '\n')
+            print(child.tag + ',', child.text)
+
+         # filewriting('===========================================\n')
 
 
 def test_pcmark(request):
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([[None, None, 'default']]).act()
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([[None, None, 'default']]).act()
 
-    re = InstallManage().set_name('crystaldiskmark')
-    if not re:
-        pytest.skip('The installation process is failed, so skip the test.')
+    # re = InstallManage().set_name('pcmark')
+    # if not re:
+    #     pytest.skip('The installation process is failed, so skip the test.')
 
     launchapp()
     if os.path.exists(f'.\\performance\\PCMark10_performance_result.cs'):

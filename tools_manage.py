@@ -72,8 +72,12 @@ class Futuremark_ThreeDMark(SW):
 class Futuremark_PCMark(SW):
     def __init__(self):
         super().__init__()
-        self.name='PCMark10'
-        self.reg='PCM10-TPRO-20230330-23H7Z-6S94D-4TSNE-T4USP'
+        self.name='pcmark'
+        try:
+            with open(self.des_url+self.name+'\\'+ 'sn.txt') as file:
+                self.reg=file.readlines()[0]
+        except FileNotFoundError:
+            self.reg='PCM10-TPRO-20230330-23H7Z-6S94D-4TSNE-T4USP'
 
     def install(self):
         if not self.check(self.name):
