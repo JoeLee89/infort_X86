@@ -3,10 +3,14 @@ import hwinfo_collect
 from pywinauto import Application
 from pywinauto import Desktop
 from common_func import *
+from tools_manage import InstallManage
 
 
 @pytest.fixture(scope='session')
 def hw64info_launch(burnin_launch):
+    re = InstallManage().set_name('hwinfo64')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
     if not os.path.exists('.\\temp\\hwinfo64log.txt'):
         subprocess.Popen('.\\tool\\hwinfo64\\HWiNFO64.exe')
 
@@ -36,6 +40,10 @@ def hw64info_launch(burnin_launch):
 
 @pytest.fixture(scope='session')
 def burnin_launch():
+    re=InstallManage().set_name('burnintest')
+    if not re:
+        pytest.skip('The installation process is failed, so skip the test.')
+
     if not os.path.exists('.\\temp\\hwinfo64log.txt'):
         burnin_config='''
         SETTEST 3D

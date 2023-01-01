@@ -134,10 +134,10 @@ class Burnintest(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-
+        # to get the burnin test file name
         file_name=self.search_file()
         if file_name == '':
-            print('Look like there is not related execute file in the folder. skip the installation.')
+            print('Look like there is not related executable file in the folder. skip the installation.')
             return False
         print('Please wait, while the installation is processing.')
         process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent /suppressmsgboxes',shell=True)
@@ -152,14 +152,34 @@ class Burnintest(SW):
             self.registry()
             return True
 
-
     def registry(self):
-        shutil.copy(self.sour_url + self.name + '\\' + 'key.dat','C:\\Program Files\\BurnInTest')
+        shutil.copy(self.sour_url + self.name + '\\' + 'key.dat', 'C:\\Program Files\\BurnInTest')
         if os.path.exists('C:\\Program Files\\BurnInTest\\key.dat'):
             print('the registration is finished')
         else:
             print('The registration got something wrong.')
             print('Can not get the key.dat file in the burnin test folder')
+
+
+class HWinfo64(SW):
+    def __init__(self):
+        super().__init__()
+        self.name = 'hwinfo64'
+
+    def install(self):
+        try:
+            shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
+        except Exception as a:
+            print('can not find related files from the url.')
+            print('Error as : ', a)
+            return False
+        if os.path.exists(self.des_url + self.name):
+            print('the installation is finished')
+            return True
+        else:
+            print('The installation got something wrong.')
+            return False
+
 
 class Sandra(SW):
     def __init__(self):
@@ -266,6 +286,10 @@ class InstallManage:
 
         elif name=='burnintest':
             sw = Burnintest()
+            re = sw.install()
+
+        elif name=='hwinfo64':
+            sw = HWinfo64()
             re = sw.install()
 
         elif name=='crystaldiskmark':
