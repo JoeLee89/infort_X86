@@ -595,6 +595,8 @@ def test_11(request):
     # data = ActManage(item_total_path(), request.node.name)
     # data.bios_set([None, None, 'default']).act()
     # data.bios_set([]).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
     assert 1==1
 
 
