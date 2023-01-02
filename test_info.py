@@ -11,9 +11,9 @@ def hw64info_launch(burnin_launch):
     re = InstallManage().set_name('hwinfo64')
     if not re:
         pytest.skip('The installation process is failed, so skip the test.')
+
     if not os.path.exists('.\\temp\\hwinfo64log.txt'):
         subprocess.Popen('.\\tool\\hwinfo64\\HWiNFO64.exe')
-
         app=Desktop()['HWiNFO64']
         app.wait('visible')
         app.set_focus()
@@ -71,14 +71,12 @@ def burnin_launch():
         subprocess.Popen(f'C:\\Program Files\\BurnInTest\\bit.exe -s C:\\test.bits')
         time.sleep(10)
 
-def test_dummy():
-    assert True
 
 def test_video_gen3(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'
@@ -104,8 +102,8 @@ def test_video_gen3(hw64info_launch,request):
 def test_video_gen4(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'
@@ -132,8 +130,8 @@ def test_video_gen4(hw64info_launch,request):
 def test_storage(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     start='Drives --------------------------------------------------------------------'
     end='Audio ---------------------------------------------------------------------'
@@ -153,8 +151,8 @@ def test_storage(hw64info_launch,request):
 def test_memory(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([None, None, 'default']).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     start='Memory --------------------------------------------------------------------'
     end='Bus -----------------------------------------------------------------------'
