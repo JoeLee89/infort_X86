@@ -1,4 +1,5 @@
 import pytest,items_collection,os,subprocess,re
+from tools_manage import InstallManage
 
 
 # def pytest_addoption(parser):
@@ -48,12 +49,16 @@ def final():
         os.mkdir('temp')
     if not os.path.exists('tool'):
         os.mkdir('tool')
+    # 先裝sleeper tool，之後會一直需要
+    result = InstallManage().set_name('sleeper')
+    if not result:
+        pytest.skip('The installation process is failed, so skip the test.')
+
     items_collection.data_collection()
 
     yield None
 
     # after item test is finished, the following is going to test.
-
     # compare count number with the file test_item_original.txt list, if they are the same
     # compare_result = comparison()
 
