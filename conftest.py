@@ -44,6 +44,10 @@ def comparison():
 @pytest.fixture(scope='session',autouse=True)
 def final():
     items=None
+    if not os.path.exists('temp'):
+        os.mkdir('temp')
+    if not os.path.exists('tool'):
+        os.mkdir('tool')
     items_collection.data_collection()
 
     yield None

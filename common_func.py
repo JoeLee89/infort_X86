@@ -24,8 +24,6 @@ class Process(ABC):
         self.script_location=f'{os.getcwd()}\\'
         self.temp_log_location='.\\temp\\'
         self.auto_location = f'{self.location}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\'
-        if not os.path.exists('temp'):
-            os.mkdir('temp')
 
 
     @abstractmethod
