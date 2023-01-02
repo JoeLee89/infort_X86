@@ -8,7 +8,7 @@ from pywinauto.application import Application
 class SW:
     def __init__(self):
         # self.sour_url= 'c:\\tool\\'
-        self.sour_url= 'C:\\Users\\sc1x\\Desktop\\temp\\'
+        self.sour_url= 'C:\\tppl\\'
         self.des_url='.\\tool\\'
 
     def check(self,name):
@@ -180,6 +180,24 @@ class HWinfo64(SW):
             print('The installation got something wrong.')
             return False
 
+class Sleeper(SW):
+    def __init__(self):
+        super().__init__()
+        self.name = 'sleeper'
+
+    def install(self):
+        try:
+            shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
+        except Exception as a:
+            print('can not find related files from the url.')
+            print('Error as : ', a)
+            return False
+        if os.path.exists(self.des_url + self.name):
+            print('the installation is finished')
+            return True
+        else:
+            print('The installation got something wrong.')
+            return False
 
 class Sandra(SW):
     def __init__(self):
