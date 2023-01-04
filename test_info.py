@@ -66,17 +66,17 @@ def burnin_launch():
         RUN CONFIG
         EXIT
         '''
-        with open('C:\\test.bits','w') as file:
+        with open('.\\temp\\test.bits','w') as file:
             file.write(burnin_config)
-        subprocess.Popen(f'C:\\Program Files\\BurnInTest\\bit.exe -s C:\\test.bits')
+        subprocess.Popen(f'C:\\Program Files\\BurnInTest\\bit.exe -s {os.getcwd()}\\temp\\test.bits')
         time.sleep(10)
 
 
 def test_video_gen3(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([[None, None, 'default']]).act()
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([[None, None, 'default']]).act()
 
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'

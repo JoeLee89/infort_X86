@@ -358,7 +358,7 @@ class InstallManage:
         return re
 
 
-InstallManage().set_name('burnintest')
+# InstallManage().set_name('burnintest')
 
 
 
