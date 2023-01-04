@@ -205,6 +205,23 @@ class Sleeper(SW):
             return True
 
 
+class Amisce(SW):
+    def __init__(self):
+        super().__init__()
+        self.name = 'amisce'
+
+    def install(self):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+        else:
+            print('the installation is finished')
+            return True
+
 class Sandra(SW):
     def __init__(self):
         super().__init__()
@@ -324,6 +341,10 @@ class InstallManage:
 
         elif name=='crystaldiskmark':
             sw = CrystalDiskMark()
+            re = sw.install()
+
+        elif name=='amisce':
+            sw = Amisce()
             re = sw.install()
 
         return re

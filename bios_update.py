@@ -1,7 +1,8 @@
-import os
+import os,pytest
 from pprint import pprint
 import subprocess
 from abc import ABC, abstractmethod
+from tools_manage import InstallManage
 class BiosData:
     def __init__(self):
         self.data=[]
@@ -157,7 +158,11 @@ class DefaultBios(Method):
 
 class Manager:
     def __init__(self):
-        self.data=BiosData()
+        # confirm if the amisce folder exists, and copy all files to project folder
+        result = InstallManage().set_name('amisce')
+        if not result:
+            pytest.skip('The installation process is failed, so skip the test.')
+        self.data = BiosData()
 
     def set_bios_title_item(self,name):
         self.data.set_title_name(name)
