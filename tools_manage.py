@@ -87,16 +87,18 @@ class Futuremark_PCMark(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-
-        print('Please wait, while the installation is processing.')
-        process=subprocess.Popen(self.des_url+self.name+'\\'+'pcmark10-setup.exe /installpath=c:\\ /install /silent',shell=True)
-        re=process.wait()
-        if re>0:
-            print('The installation got something wrong.')
-            return False
+        if not os.path.exists('c:\\PCMark 10'):
+            print('Please wait, while the installation is processing.')
+            process=subprocess.Popen(self.des_url+self.name+'\\'+'pcmark10-setup.exe /installpath=c:\\ /install /silent',shell=True)
+            re=process.wait()
+            if re>0:
+                print('The installation got something wrong.')
+                return False
+            else:
+                print('the installation is finished')
+                self.registry()
+                return True
         else:
-            print('the installation is finished')
-            self.registry()
             return True
 
 
@@ -127,29 +129,35 @@ class Burnintest(SW):
         return target
 
     def install(self):
+        file_name = ''
         if not self.check(self.name):
             try:
                 shutil.copytree(self.sour_url + self.name, self.des_url+self.name)
+                # to get the burnin test file name
+                file_name = self.search_file()
             except Exception as a:
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        # to get the burnin test file name
-        file_name=self.search_file()
+            # # to get the burnin test file name
+            # file_name=self.search_file()
         if file_name == '':
             print('Look like there is not related executable file in the folder. skip the installation.')
             return False
-        print('Please wait, while the installation is processing.')
-        process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent /suppressmsgboxes',shell=True)
-        re=process.wait()
-        time.sleep(15)
-        if re>0:
-            print('The installation got something wrong.')
-            return False
+        if not os.path.exists('C:\\Program Files\\BurnInTest'):
+            print('Please wait, while the installation is processing.')
+            process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent /suppressmsgboxes',shell=True)
+            re=process.wait()
+            time.sleep(15)
+            if re>0:
+                print('The installation got something wrong.')
+                return False
+            else:
+                print('the installation is finished')
+                os.system('taskkill /F /IM bit.exe')
+                self.registry()
+                return True
         else:
-            print('the installation is finished')
-            os.system('taskkill /F /IM bit.exe')
-            self.registry()
             return True
 
     def registry(self):
@@ -167,18 +175,17 @@ class HWinfo64(SW):
         self.name = 'hwinfo64'
 
     def install(self):
-        try:
-            shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
-        except Exception as a:
-            print('can not find related files from the url.')
-            print('Error as : ', a)
-            return False
-        if os.path.exists(self.des_url + self.name):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+        else:
             print('the installation is finished')
             return True
-        else:
-            print('The installation got something wrong.')
-            return False
+
 
 class Sleeper(SW):
     def __init__(self):
@@ -186,18 +193,17 @@ class Sleeper(SW):
         self.name = 'sleeper'
 
     def install(self):
-        try:
-            shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
-        except Exception as a:
-            print('can not find related files from the url.')
-            print('Error as : ', a)
-            return False
-        if os.path.exists(self.des_url + self.name):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url + self.name)
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+        else:
             print('the installation is finished')
             return True
-        else:
-            print('The installation got something wrong.')
-            return False
+
 
 class Sandra(SW):
     def __init__(self):
@@ -225,18 +231,21 @@ class Sandra(SW):
 
         file_name=self.search_file()
         if file_name == '':
-            print('Look like there is not related execute file in the folder. skip the installation.')
+            print('Look like there is not related execute file in the .\\tool\\. skip the installation.')
             return False
-        print('Please wait, while the installation is processing.')
-        process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent ',shell=True)
-        re=process.wait()
-        time.sleep(15)
-        if re>0:
-            print('The installation got something wrong.')
-            return False
+        if not os.path.exists('C:\\Program Files\\SiSoftware'):
+            print('Please wait, while the installation is processing.')
+            process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent ',shell=True)
+            re=process.wait()
+            time.sleep(15)
+            if re>0:
+                print('The installation got something wrong.')
+                return False
+            else:
+                print('the installation is finished')
+                self.registry()
+                return True
         else:
-            print('the installation is finished')
-            self.registry()
             return True
 
 
@@ -280,6 +289,9 @@ class CrystalDiskMark(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
+        else:
+            print('the installation is finished')
+            return True
 
 
 
