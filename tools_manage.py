@@ -1,6 +1,6 @@
 from abc import ABC,abstractmethod
 import shutil
-import os,re,time
+import os,re,time,psutil
 import subprocess
 import pywinauto
 from pywinauto.application import Application
@@ -123,10 +123,16 @@ class Burnintest(SW):
         target = ''
         for i in file:
             try:
-                target = re.search(r'(^bit.*.exe)', i).group(1)
+                target = re.search(r'(^bit.*\.exe)', i).group(1)
             except:
                 pass
         return target
+
+    def processtokill(self):
+        for proc in psutil.process_iter():
+            # print(proc.name)
+            if 'bit.exe' in str(proc.name):
+                proc.kill()
 
     def install(self):
         file_name = ''
@@ -134,27 +140,29 @@ class Burnintest(SW):
             try:
                 shutil.copytree(self.sour_url + self.name, self.des_url+self.name)
                 # to get the burnin test file name
-                file_name = self.search_file()
+
             except Exception as a:
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-            # # to get the burnin test file name
-            # file_name=self.search_file()
+        # to get the burnin test file name
+        file_name=self.search_file()
         if file_name == '':
-            print('Look like there is not related executable file in the folder. skip the installation.')
+            print('Look like there is no related executable file in the folder. skip the installation.')
             return False
         if not os.path.exists('C:\\Program Files\\BurnInTest'):
             print('Please wait, while the installation is processing.')
             process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent /suppressmsgboxes',shell=True)
             re=process.wait()
             time.sleep(15)
+
             if re>0:
                 print('The installation got something wrong.')
                 return False
             else:
                 print('the installation is finished')
-                os.system('taskkill /F /IM bit.exe')
+                self.processtokill()
+                # os.system('taskkill /F /IM bit.exe')
                 self.registry()
                 return True
         else:
@@ -350,7 +358,7 @@ class InstallManage:
         return re
 
 
-InstallManage().set_name('amisce')
+InstallManage().set_name('burnintest')
 
 
 
