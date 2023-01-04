@@ -52,7 +52,7 @@ def final():
     # 先裝sleeper tool，之後會一直需要
     result = InstallManage().set_name('sleeper')
     if not result:
-        pytest.skip('The installation process is failed, so skip the test.')
+        pytest.skip('The installation sleeper process is failed, so skip the test.')
 
     items_collection.data_collection()
 

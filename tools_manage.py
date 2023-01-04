@@ -343,6 +343,10 @@ class InstallManage:
             sw = Amisce()
             re = sw.install()
 
+        elif name=='sleeper':
+            sw = Sleeper()
+            re = sw.install()
+
         return re
 
 

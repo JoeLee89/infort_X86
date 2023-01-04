@@ -161,7 +161,7 @@ class Manager:
         # confirm if the amisce folder exists, and copy all files to project folder
         result = InstallManage().set_name('amisce')
         if not result:
-            pytest.skip('The installation process is failed, so skip the test.')
+            pytest.skip('The AMISCE installation process is failed, so skip the test.')
         self.data = BiosData()
 
     def set_bios_title_item(self,name):
