@@ -182,9 +182,8 @@ class HWinfo64(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        else:
-            print('the installation is finished')
-            return True
+        print('the installation is finished')
+        return True
 
 
 class Sleeper(SW):
@@ -200,9 +199,8 @@ class Sleeper(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        else:
-            print('the installation is finished')
-            return True
+        print('the installation is finished')
+        return True
 
 
 class Amisce(SW):
@@ -218,9 +216,8 @@ class Amisce(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        else:
-            print('the installation is finished')
-            return True
+        print('the installation is finished')
+        return True
 
 class Sandra(SW):
     def __init__(self):
@@ -306,9 +303,8 @@ class CrystalDiskMark(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        else:
-            print('the installation is finished')
-            return True
+        print('the installation is finished')
+        return True
 
 
 
@@ -350,7 +346,7 @@ class InstallManage:
         return re
 
 
-# InstallManage().set_name('3dmark')
+InstallManage().set_name('amisce')
 
 
 
