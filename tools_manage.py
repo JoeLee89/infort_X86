@@ -8,7 +8,7 @@ from pywinauto.application import Application
 class SW:
     def __init__(self):
         # self.sour_url= 'c:\\tool\\'
-        self.sour_url= 'C:\\tppl\\'
+        self.sour_url= 'C:\\tool\\'
         self.des_url='.\\tool\\'
 
     def check(self,name):
