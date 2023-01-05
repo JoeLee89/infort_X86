@@ -40,7 +40,7 @@ re=lan_device_number_get()
 subprocess.Popen(f'netsh interface ip set address name="{re}" static {ip} {mask}')
 
 #start to launch server action
-host='0.0.0.0'
+host=ip
 port=8000
 server=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host,port))

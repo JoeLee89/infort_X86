@@ -101,8 +101,8 @@ def lan_device_number_get_other():
 
 # to set pointed dut ip as static ip, and to make a connecting with server
 def lan_link_initial(lan_number):
-    dut_ip='192.168.10.18'
-    server_ip = '192.168.10.19'
+    dut_ip='10.0.0.1.18'
+    server_ip = '10.0.0.1.19'
     num=lan_device_number_get_other()
     command=f'netsh interface ip set address "{num[lan_number]}" static {dut_ip}'
     # cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" static {dut_ip}')
