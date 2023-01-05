@@ -166,7 +166,7 @@ def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_g
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     # disable lan2 chip
     if 'intel' in result:
@@ -229,7 +229,7 @@ def test_lan1_wol_bios_enable_os_disable_s3(request, get_mac, lan_device_number_
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     # disable lan2 chip
     if 'intel' in result:
@@ -292,7 +292,7 @@ def test_lan1_wol_bios_disable_os_enable_s3(request, get_mac, lan_device_number_
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     # disable lan2 chip
     if 'intel' in result:
@@ -355,7 +355,7 @@ def test_lan1_wol_bios_disable_os_disable_s3(request, get_mac, lan_device_number
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     # disable lan2 chip
     if 'intel' in result:
@@ -559,7 +559,7 @@ def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_ge
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     #disable lan2 chip
     if 'intel' in result:
@@ -621,7 +621,7 @@ def test_lan2_wol_bios_enable_os_disable_s3(request, get_mac,lan_device_number_g
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     #disable lan2 chip
     if 'intel' in result:
@@ -683,7 +683,7 @@ def test_lan2_wol_bios_disable_os_enable_s3(request, get_mac,lan_device_number_g
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     #disable lan2 chip
     if 'intel' in result:
@@ -745,7 +745,7 @@ def test_lan2_wol_bios_disable_os_disable_s3(request, get_mac,lan_device_number_
     result = result if len(result) > 0 else ''
 
     # start changing bios setting
-    data = ActManage(item_total_path(), request.note.name)
+    data = ActManage(item_total_path(), request.node.name)
 
     #disable lan2 chip
     if 'intel' in result:
