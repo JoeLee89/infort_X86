@@ -82,7 +82,7 @@ def test_3dmark(request):
     data.bios_set([[None, None, 'default']]).act()
     re = InstallManage().set_name('3dmark')
     if not re:
-        pytest.skip('The installation process is failed, so skip the test.')
+        pytest.skip('The 3DMark installation process is failed, so skip the test.')
 
     launch3dmark()
 

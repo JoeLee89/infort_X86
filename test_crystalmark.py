@@ -138,7 +138,7 @@ def test_crystalmark(request):
 
     re=InstallManage().set_name('crystaldiskmark')
     if not re:
-        pytest.skip('The installation process is failed, so skip the test.')
+        pytest.skip('The Crystal Mark installation process is failed, so skip the test.')
 
 
     app = Application().start(cmd_line=r'.\tool\CrystalDiskMark\DiskMark64.exe')

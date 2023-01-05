@@ -7,7 +7,6 @@ import pytest, allure
 from common_func import *
 from tools_manage import *
 
-
 #pywinauto.timings.Timings.slow()
 
 repeat=False
@@ -116,7 +115,6 @@ def sandralaunch(folder):
     app["Create Report : Step 9 of 9"].type_keys('%s \\sandra_benchmark_report.txt' % (os.getcwd()))
     app["Create Report : Step 9 of 9"].type_keys('{ENTER}')
 
-
     waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
     #app["Create Report - SiSoftware Sandra"].wait_cpu_usage_lower(threshold=5)  # wait until CPU usage is lower than 5%
     #print(waittoclose)
@@ -130,15 +128,13 @@ def sandralaunch(folder):
     #waittoclose=app["Create Report - SiSoftware Sandra"].wait_not('visible')
 
 
-
-
 def test_sandra(request):
     data = ActManage(item_total_path(), request.node.name)
     data.bios_set([[None, None, 'default']]).act()
 
     re=InstallManage().set_name('sandra')
     if not re:
-        pytest.skip('The installation process is failed, so skip the test.')
+        pytest.skip('The Sandra installation process is failed, so skip the test.')
 
     target_folder=os.listdir('C:\\Program Files\\SiSoftware')[0]
     target_folder='C:\\Program Files\\SiSoftware\\' + target_folder

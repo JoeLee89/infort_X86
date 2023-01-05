@@ -75,8 +75,8 @@ def burnin_launch():
 def test_video_gen3(hw64info_launch,request):
     # set up bios setting to default
     # save log file to temp, so it could remember what test item should continue after reboot.
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([[None, None, 'default']]).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     start='Video Adapter -------------------------------------------------------------'
     end='Monitor -------------------------------------------------------------------'

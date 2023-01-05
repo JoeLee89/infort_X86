@@ -89,10 +89,10 @@ def final():
             os.unlink(startup_bat_path)
             temp_file=os.listdir('.\\temp')
             for i in temp_file:
-                print('delete ffile', 'i')
+                print('Deleting file:', i)
                 os.unlink(f'.\\temp\\{i}')
         except Exception as a:
-            print('Error occure:', a)
+            print('Error occurred:', a)
 
         # pytest.exit('All test items are finished, so exit the test.')
 

@@ -74,12 +74,12 @@ def xmlcheck():
 
 
 def test_pcmark(request):
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([[None, None, 'default']]).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
-    # re = InstallManage().set_name('pcmark')
-    # if not re:
-    #     pytest.skip('The installation process is failed, so skip the test.')
+    re = InstallManage().set_name('pcmark')
+    if not re:
+        pytest.skip('The PCMark installation process is failed, so skip the test.')
 
     launchapp()
     if os.path.exists(f'.\\performance\\PCMark10_performance_result.cs'):
