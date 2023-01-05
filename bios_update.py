@@ -194,6 +194,11 @@ class Action:
         item_change=ChangeItems()
         value_change=ChangeValue()
         default_bios=DefaultBios()
+        print('=======changing bios item=======')
+        print('title=',self.title)
+        print('target=',self.target)
+        print('type=',self.type)
+        print('================================')
 
         if self.type == 'item':
             lan.do_update(item_change)
