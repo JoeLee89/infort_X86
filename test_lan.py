@@ -162,7 +162,8 @@ def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_g
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -224,7 +225,8 @@ def test_lan1_wol_bios_enable_os_disable_s3(request, get_mac, lan_device_number_
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -286,7 +288,8 @@ def test_lan1_wol_bios_disable_os_enable_s3(request, get_mac, lan_device_number_
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -348,7 +351,8 @@ def test_lan1_wol_bios_disable_os_disable_s3(request, get_mac, lan_device_number
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -411,7 +415,8 @@ def test_lan1_wol_bios_enable_os_enable_s4(request, get_mac, lan_device_number_g
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.node.name)
@@ -474,7 +479,8 @@ def test_lan1_wol_bios_enable_os_enable_s5(request, get_mac, lan_device_number_g
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.node.name)
@@ -549,7 +555,8 @@ def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_ge
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -610,7 +617,8 @@ def test_lan2_wol_bios_enable_os_disable_s3(request, get_mac,lan_device_number_g
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -671,7 +679,8 @@ def test_lan2_wol_bios_disable_os_enable_s3(request, get_mac,lan_device_number_g
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -732,7 +741,8 @@ def test_lan2_wol_bios_disable_os_disable_s3(request, get_mac,lan_device_number_
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.note.name)
@@ -794,7 +804,8 @@ def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_ge
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.node.name)
@@ -856,7 +867,8 @@ def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_ge
     # get all lan devices info
     sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     result=sub.stdout.read()
-    result=[i for i in result.decode().lower().split() if 'intel' in i][0]
+    result = [i for i in result.decode().lower().split() if 'intel' in i]
+    result = result if len(result) > 0 else ''
 
     # start changing bios setting
     data = ActManage(item_total_path(), request.node.name)
