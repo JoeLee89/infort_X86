@@ -32,7 +32,7 @@ def wol(mac):
 
 #make server IP as static IP first
 
-ip='10.0.0.1.19'
+ip='10.0.1.19'
 mask='255.255.255.0'
 print('set up the first connected etherner device IP as static IP.')
 print(f'IP= {ip}, MASK=255.255.255.0')
