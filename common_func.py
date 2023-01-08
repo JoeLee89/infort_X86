@@ -108,7 +108,7 @@ class Reboot(Process):
                 file_name=i
 
         # _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
-        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\report '
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\allure-results '
         # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
         if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
             if len(self.bios_setting) > 0:

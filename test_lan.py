@@ -149,787 +149,748 @@ def device_wol_manage_action(name,require):
     win['OK'].click()
     main.close()
 
+def print_lan_info(name,mac):
+    with allure.step('The Lan device:'):
+        allure.step(f'Lan Name: {name}')
+        allure.step(f'Lan MAC: {mac}')
 
-def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Enabled'
-    bios_status = 'Enabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+class Test_WOL_LAN1:
+    def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Enabled'
+        bios_status = 'Enabled'
+        allure.title('')
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        command = 'wmic nic where netEnabled=true get name'
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    lan_link = lan_link_initial(lan_number)
-    # get client side object and read to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
+
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
+
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+
+        time.sleep(5)
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
-
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        assert _re < 300
 
 
-def test_lan1_wol_bios_enable_os_disable_s3(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Disabled'
-    bios_status = 'Enabled'
+    def test_lan1_wol_bios_enable_os_disable_s3(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Disabled'
+        bios_status = 'Enabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+        command = 'wmic nic where netEnabled=true get name'
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    # confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    lan_link = lan_link_initial(lan_number)
-    # get client side object and read to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
+
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+
+        time.sleep(5)
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
-
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        assert _re > 300
 
 
-def test_lan1_wol_bios_disable_os_enable_s3(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Enabled'
-    bios_status = 'Disabled'
+    def test_lan1_wol_bios_disable_os_enable_s3(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Enabled'
+        bios_status = 'Disabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+        command = 'wmic nic where netEnabled=true get name'
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    # confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    lan_link = lan_link_initial(lan_number)
-    # get client side object and read to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
+
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+
+        time.sleep(5)
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
-
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        assert _re > 300
 
 
-def test_lan1_wol_bios_disable_os_disable_s3(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Disabled'
-    bios_status = 'Disabled'
+    def test_lan1_wol_bios_disable_os_disable_s3(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Disabled'
+        bios_status = 'Disabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+        command = 'wmic nic where netEnabled=true get name'
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    # confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    lan_link = lan_link_initial(lan_number)
-    # get client side object and read to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
+
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+
+        time.sleep(5)
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
-
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        assert _re > 300
 
 
-# @pytest.mark.skip('aaa')
-def test_lan1_wol_bios_enable_os_enable_s4(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Enabled'
-    bios_status = 'Enabled'
+    # @pytest.mark.skip('aaa')
+    def test_lan1_wol_bios_enable_os_enable_s4(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Enabled'
+        bios_status = 'Enabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+        command = 'wmic nic where netEnabled=true get name'
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    # confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    lan_link = lan_link_initial(lan_number)
-    # get client side object and read to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
+
+        time.sleep(5)
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
-
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
-
-    time.sleep(5)
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
-
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        assert _re < 300
 
 
-# @pytest.mark.skip('testing')
-def test_lan1_wol_bios_enable_os_enable_s5(request, get_mac, lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    # confirm which lan device should be tested, starting from 0
-    lan_number = 0
-    os_wol_status = 'Enabled'
-    bios_status = 'Enabled'
+    # @pytest.mark.skip('testing')
+    def test_lan1_wol_bios_enable_os_enable_s5(request, get_mac, lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        # confirm which lan device should be tested, starting from 0
+        lan_number = 0
+        os_wol_status = 'Enabled'
+        bios_status = 'Enabled'
 
-    command = 'wmic nic where netEnabled=true get name'
+        command = 'wmic nic where netEnabled=true get name'
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result = sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result = sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    # disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
-                       ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                       ['Wake up minute', '5', 'value']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
-                       ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                       ['Wake up minute', '5', 'value']]).act()
+        # disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
+                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
+                           ['Wake up minute', '5', 'value']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
+                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
+                           ['Wake up minute', '5', 'value']]).act()
 
-    # to set lan ic and connect with server
-    lan_link = lan_link_initial(lan_number)
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    # get client side object and ready to send MAC address to server
-    mac_adr = get_mac[lan_number]
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occurred, while lan link.')
+        while True:
+            recv = lan_link.recv(1024).decode()
+            if recv == 'ok':
+                print(f'from server receive:{recv}')
+                break
+
+        if not os.path.exists('.\\temp\\shutdown.log'):
+            with open('.\\temp\\shutdown.log', 'w') as file:
+                now = datetime.datetime.now()
+                file.write(datetime.datetime.strftime(now, '%Y-%m-%d-%H:%M:%S'))
+            cmd('shutdown /s /t 1 /f')
+            print('now sleep for 10 sec')
+            time.sleep(10)
+
+        if os.path.exists('.\\temp\\shutdown.log'):
+            with open('.\\temp\\shutdown.log', 'r') as file:
+                now = file.readlines()
+                now = datetime.datetime.strptime(now[0], '%Y-%m-%d-%H:%M:%S')
+        else:
+            pytest.skip('look like shutdown.log did not save before')
+
+        after = datetime.datetime.now()
+        _re = (after - now).seconds
+
+        # reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re < 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+class Test_WOL_LAN2:
+    def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Enabled'
+        bios_status='Enabled'
 
-    while True:
-        recv = lan_link.recv(1024).decode()
-        if recv == 'ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    if not os.path.exists('.\\temp\\shutdown.log'):
-        with open('.\\temp\\shutdown.log', 'w') as file:
-            now = datetime.datetime.now()
-            file.write(datetime.datetime.strftime(now, '%Y-%m-%d-%H:%M:%S'))
-        cmd('shutdown /s /t 1 /f')
-        print('now sleep for 10 sec')
-        time.sleep(10)
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    if os.path.exists('.\\temp\\shutdown.log'):
-        with open('.\\temp\\shutdown.log', 'r') as file:
-            now = file.readlines()
-            now = datetime.datetime.strptime(now[0], '%Y-%m-%d-%H:%M:%S')
-    else:
-        pytest.skip('look like shutdown.log did not save before')
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    after = datetime.datetime.now()
-    _re = (after - now).seconds
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-    # reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Enabled'
-    bios_status='Enabled'
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    command = 'wmic nic where netEnabled=true get name'
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        time.sleep(5)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
-
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
-
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re < 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+    def test_lan2_wol_bios_enable_os_disable_s3(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Disabled'
+        bios_status='Enabled'
 
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-def test_lan2_wol_bios_enable_os_disable_s3(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Disabled'
-    bios_status='Enabled'
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    command = 'wmic nic where netEnabled=true get name'
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        time.sleep(5)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re > 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+    def test_lan2_wol_bios_disable_os_enable_s3(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Enabled'
+        bios_status='Disabled'
 
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-def test_lan2_wol_bios_disable_os_enable_s3(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Enabled'
-    bios_status='Disabled'
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    command = 'wmic nic where netEnabled=true get name'
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        time.sleep(5)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re > 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+    def test_lan2_wol_bios_disable_os_disable_s3(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Disabled'
+        bios_status='Disabled'
 
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-def test_lan2_wol_bios_disable_os_disable_s3(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Disabled'
-    bios_status='Disabled'
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    command = 'wmic nic where netEnabled=true get name'
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        time.sleep(5)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re > 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+    # @pytest.mark.skip('aaa')
+    def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Enabled'
+        bios_status='Enabled'
 
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re > 300
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
 
-# @pytest.mark.skip('aaa')
-def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Enabled'
-    bios_status='Enabled'
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    command = 'wmic nic where netEnabled=true get name'
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        now = datetime.datetime.now()
+        cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
 
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item']]).act()
+        time.sleep(5)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    #confirm the data_re returned list
-    # if not data_re[0]:
-    #     pytest.skip(data_re[1])
-
-    lan_link = lan_link_initial(lan_number)
-    #get client side object and read to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occured, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
+        assert _re < 300
 
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
+    # @pytest.mark.skip('testing')
+    def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_get):
+        # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
+        #confirm which lan device should be tested, starting from 0
+        lan_number=1
+        os_wol_status = 'Enabled'
+        bios_status='Enabled'
 
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
+        command = 'wmic nic where netEnabled=true get name'
 
-    now = datetime.datetime.now()
-    cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
+        # get all lan devices info
+        sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        result=sub.stdout.read()
+        result = [i for i in result.decode().lower().split() if 'intel' in i]
+        result = result[0] if len(result) > 0 else ''
 
-    time.sleep(5)
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
+        # start changing bios setting
+        data = ActManage(item_total_path(), request.node.name)
 
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        #disable lan2 chip
+        if 'intel' in result:
+            data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
+                           ['RTC Wake system from S5', 'Fixed Time','item'],
+                           ['Wake up minute', '5','value']]).act()
+        else:
+            data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
+                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
+                           ['Wake up minute', '5', 'value']]).act()
 
-# @pytest.mark.skip('testing')
-def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_get):
-    # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
-    #confirm which lan device should be tested, starting from 0
-    lan_number=1
-    os_wol_status = 'Enabled'
-    bios_status='Enabled'
+        lan = get_lan_name()
+        # print lan related info to allure report
+        print_lan_info(lan[lan_number], get_mac[lan_number])
+        # get link with wol server side
+        lan_link = lan_link_initial(lan_number)
+        # send MAC data to server
+        try:
+            lan_link.sendall(get_mac[lan_number].encode('utf-8'))
+        except Exception as a:
+            print('Error occurred, while lan link.')
+            lan_link.close()
+            pytest.skip('server connection has error.')
 
-    command = 'wmic nic where netEnabled=true get name'
+        # enable or disable lan device in OS device management
+        device_wol_manage_action(lan[lan_number], os_wol_status)
+        while True:
+            recv=lan_link.recv(1024).decode()
+            if recv=='ok':
+                print(f'from server receive:{recv}')
+                break
 
-    # get all lan devices info
-    sub = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    result=sub.stdout.read()
-    result = [i for i in result.decode().lower().split() if 'intel' in i]
-    result = result[0] if len(result) > 0 else ''
+        if not os.path.exists('.\\temp\\shutdown.log'):
+            with open('.\\temp\\shutdown.log','w') as file:
+                now=datetime.datetime.now()
+                file.write(datetime.datetime.strftime(now,'%Y-%m-%d-%H:%M:%S'))
+            cmd('shutdown /s /t 1 /f')
+            print('now sleep for 10 sec')
+            time.sleep(10)
 
-    # start changing bios setting
-    data = ActManage(item_total_path(), request.node.name)
+        if os.path.exists('.\\temp\\shutdown.log'):
+            with open('.\\temp\\shutdown.log', 'r') as file:
+                now=file.readlines()
+                now=datetime.datetime.strptime(now[0],'%Y-%m-%d-%H:%M:%S')
+        else:
+            pytest.skip('look like shutdown.log did not save before')
 
-    #disable lan2 chip
-    if 'intel' in result:
-        data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
-                       ['RTC Wake system from S5', 'Fixed Time','item'],
-                       ['Wake up minute', '5','value']]).act()
-    else:
-        data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
-                       ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                       ['Wake up minute', '5', 'value']]).act()
 
-    # to set lan ic and connect with server
-    lan_link = lan_link_initial(lan_number)
+        after=datetime.datetime.now()
+        _re=(after-now).seconds
 
-    # get client side object and ready to send MAC address to server
-    mac_adr=get_mac[lan_number]
-
-    #send MAC data to server
-    try:
-        lan_link.sendall(mac_adr.encode('utf-8'))
-    except Exception as a:
-        print('Error occurred, while lan link.')
+        #reset IP to dynamic status
+        cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        pytest.skip('server connection has error.')
-
-    # enable lan device in OS device management
-    lan = get_lan_name()
-    device_wol_manage_action(lan[lan_number], os_wol_status)
-
-    while True:
-        recv=lan_link.recv(1024).decode()
-        if recv=='ok':
-            print(f'from server receive:{recv}')
-            break
-
-    if not os.path.exists('.\\temp\\shutdown.log'):
-        with open('.\\temp\\shutdown.log','w') as file:
-            now=datetime.datetime.now()
-            file.write(datetime.datetime.strftime(now,'%Y-%m-%d-%H:%M:%S'))
-        cmd('shutdown /s /t 1 /f')
-        print('now sleep for 10 sec')
-        time.sleep(10)
-
-    if os.path.exists('.\\temp\\shutdown.log'):
-        with open('.\\temp\\shutdown.log', 'r') as file:
-            now=file.readlines()
-            now=datetime.datetime.strptime(now[0],'%Y-%m-%d-%H:%M:%S')
-    else:
-        pytest.skip('look like shutdown.log did not save before')
-
-
-    after=datetime.datetime.now()
-    _re=(after-now).seconds
-
-    #reset IP to dynamic status
-    cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
-    lan_link.close()
-    assert _re < 300
+        assert _re < 300
 
 def test_lan1_surf_web(request, lan_device_number_get):
     data = ActManage(item_total_path(), request.node.name)
