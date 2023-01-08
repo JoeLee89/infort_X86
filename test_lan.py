@@ -25,20 +25,20 @@ def lan_info_collection():
     title_name=[]
     device=[]
     mac=[]
-    # search_title = re.compile(r'Ethernet adapter Ethernet.*:')
-    # search_lan_name = re.compile(r'Description.*: (.*)')
-    # search_lan_address = re.compile(r'Physical Address.*: (.*)')
-    search_title = re.compile(r'乙太網路卡 (乙太網路.*):')
-    search_lan_name = re.compile(r'描述.*: (.*)')
-    search_lan_address = re.compile(r'實體位址.*: (.*)')
+    search_title = re.compile(r'Ethernet adapter Ethernet.*:')
+    search_lan_name = re.compile(r'Description.*: (.*)')
+    search_lan_address = re.compile(r'Physical Address.*: (.*)')
+    # search_title = re.compile(r'乙太網路卡 (乙太網路.*):')
+    # search_lan_name = re.compile(r'描述.*: (.*)')
+    # search_lan_address = re.compile(r'實體位址.*: (.*)')
     lan_list=dict()
     _title=''
     _name = ''
     _mac=''
     for line in iter(proc.stdout.readline,''):
         # print(line.strip().decode('big5'))
-        # line=line.decode('utf-8')
-        line=line.decode('big5')
+        line=line.decode('utf-8')
+        # line=line.decode('big5')
         # print(line)
         search_title_re = search_title.search(line)
         search_lan_name_re = search_lan_name.search(line)
