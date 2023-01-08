@@ -9,6 +9,7 @@ intel_lan_controller_type=[
 realtek_lan_controller_type=[
     'LAN1 Enable',
     'LAN2 Enable']
+
 intel_wakeonlan_type=[
     'i219 Wake on LAN',
     'i211-AT Wake on LAN']
@@ -17,53 +18,75 @@ realtek_wakeonelan_type=[
     'LAN1 Enable',
     'LAN2 Enable']
 
-def get_lan_name():
+
+def lan_info_collection():
     proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
     title = 0
+    device=[]
+    mac=[]
     search_title = re.compile(r'Ethernet adapter Ethernet.*:')
     search_lan_name = re.compile(r'Description.*: (.*)')
-    lan_list=[]
+    search_lan_address = re.compile(r'Physical Address.*: (.*)')
+    # search_title = re.compile(r'乙太網路卡 乙太網路.*:')
+    # search_lan_name = re.compile(r'描述.*: (.*)')
+    # search_lan_address = re.compile(r'實體位址.*: (.*)')
+    lan_list=dict()
+    name = 'none'
     for line in iter(proc.stdout.readline,''):
-        # print(line.strip())
+        # print(line.strip().decode('big5'))
         line=line.decode('utf-8')
         # print(line)
-        search_title_Re = search_title.search(line)
-        search_lan_nam_Re = search_lan_name.search(line)
+        search_title_re = search_title.search(line)
+        search_lan_name_re = search_lan_name.search(line)
+        search_lan_mac_re = search_lan_address.search(line)
 
-        if not title and search_title_Re:
+        if not title and search_title_re:
             title = 1
-        if title and search_lan_nam_Re:
-            # print(search_addresse_Re.group(1).replace('-', ''))
-            lan_list.append(search_lan_nam_Re.group(1).strip())
+        if title and search_lan_name_re:
+            name=search_lan_name_re.group(1).strip()
+            lan_list[name]=''
+
+        if title and search_lan_mac_re:
+            mac=search_lan_mac_re.group(1).replace('-', '').strip()
+            lan_list[name]=mac
             title = 0
 
         if not line:
             break
+
+    device, mac=lan_oder_organize(lan_list)
+    # if mac_list.txt is empty, then will return OS collection data without organization
+    if not len(device) and not len(mac):
+        device=list(lan_list.keys())
+        mac=list(lan_list.values())
+    return device, mac
+
+
+def lan_oder_organize(content):
+    device=[]
+    mac=[]
+    orig=[]
+    with open('mac_list.txt','r') as file:
+        orig=file.readlines()
+        orig=[i.strip() for i in orig]
+    for address in orig:
+        # each mac from mac_list.txt will be checked one by one from dut os collection
+        # loop every content from OS collection, when each mac address is read from mac_list.txt
+        # so result device/mac can be organized in order
+        for name,value in content.items():
+            if address in value:
+                mac.append(value)
+                device.append(name)
+    return device, mac
+
+
+def get_lan_name():
+    lan_list,_=lan_info_collection()
     return lan_list if lan_list else []
 
 @pytest.fixture
 def get_mac():
-    proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
-    title = 0
-    search_title = re.compile(r'Ethernet adapter Ethernet.*:')
-    search_address = re.compile(r'Physical Address.*: (.*)')
-    mac_list=[]
-    for line in iter(proc.stdout.readline,''):
-        # print(line.strip())
-        line=line.decode('utf-8')
-        # print(line)
-        search_title_Re = search_title.search(line)
-        search_addresse_Re = search_address.search(line)
-
-        if not title and search_title_Re:
-            title = 1
-        if title and search_addresse_Re:
-            # print(search_addresse_Re.group(1).replace('-', ''))
-            mac_list.append(search_addresse_Re.group(1).replace('-', '').strip())
-            title = 0
-
-        if not line:
-            break
+    _,mac_list=lan_info_collection()
     return mac_list if mac_list else []
 
 @pytest.fixture()
