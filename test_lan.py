@@ -22,48 +22,58 @@ realtek_wakeonelan_type=[
 def lan_info_collection():
     proc = subprocess.Popen(['ipconfig', '-all'], stdout=subprocess.PIPE)
     title = 0
+    title_name=[]
     device=[]
     mac=[]
-    search_title = re.compile(r'Ethernet adapter Ethernet.*:')
-    search_lan_name = re.compile(r'Description.*: (.*)')
-    search_lan_address = re.compile(r'Physical Address.*: (.*)')
-    # search_title = re.compile(r'乙太網路卡 乙太網路.*:')
-    # search_lan_name = re.compile(r'描述.*: (.*)')
-    # search_lan_address = re.compile(r'實體位址.*: (.*)')
+    # search_title = re.compile(r'Ethernet adapter Ethernet.*:')
+    # search_lan_name = re.compile(r'Description.*: (.*)')
+    # search_lan_address = re.compile(r'Physical Address.*: (.*)')
+    search_title = re.compile(r'乙太網路卡 (乙太網路.*):')
+    search_lan_name = re.compile(r'描述.*: (.*)')
+    search_lan_address = re.compile(r'實體位址.*: (.*)')
     lan_list=dict()
-    name = 'none'
+    _title=''
+    _name = ''
+    _mac=''
     for line in iter(proc.stdout.readline,''):
         # print(line.strip().decode('big5'))
-        line=line.decode('utf-8')
+        # line=line.decode('utf-8')
+        line=line.decode('big5')
         # print(line)
         search_title_re = search_title.search(line)
         search_lan_name_re = search_lan_name.search(line)
         search_lan_mac_re = search_lan_address.search(line)
 
         if not title and search_title_re:
+            _title=search_title_re.group(1).strip()
             title = 1
         if title and search_lan_name_re:
-            name=search_lan_name_re.group(1).strip()
-            lan_list[name]=''
+            _name=search_lan_name_re.group(1).strip()
+            lan_list[_title]=''
 
         if title and search_lan_mac_re:
-            mac=search_lan_mac_re.group(1).replace('-', '').strip()
-            lan_list[name]=mac
+            _mac=search_lan_mac_re.group(1).replace('-', '').strip()
+            lan_list[_title]=[_name,_mac]
             title = 0
 
         if not line:
             break
 
-    device, mac=lan_oder_organize(lan_list)
+    title_name, device, mac=lan_oder_organize(lan_list)
     # if mac_list.txt is empty, then will return OS collection data without organization
     if not len(device) and not len(mac):
-        device=list(lan_list.keys())
-        mac=list(lan_list.values())
-    return device, mac
+        title_name =list(lan_list.keys())
+        for i in lan_list.values():
+            print(i)
+            device.append(i[0])
+            mac.append(i[1])
+
+    return title_name, device, mac
 
 
 def lan_oder_organize(content):
     device=[]
+    title=[]
     mac=[]
     orig=[]
     with open('mac_list.txt','r') as file:
@@ -73,52 +83,57 @@ def lan_oder_organize(content):
         # each mac from mac_list.txt will be checked one by one from dut os collection
         # loop every content from OS collection, when each mac address is read from mac_list.txt
         # so result device/mac can be organized in order
-        for name,value in content.items():
-            if address in value:
-                mac.append(value)
-                device.append(name)
-    return device, mac
+        for title_name,value in content.items():
+            if address in value[1]:
+                mac.append(value[1])
+                device.append(value[0])
+                title.append(title_name)
+
+    return title, device, mac
 
 
 def get_lan_name():
-    lan_list,_=lan_info_collection()
+    _,lan_list,_=lan_info_collection()
     return lan_list if lan_list else []
 
 @pytest.fixture
 def get_mac():
-    _,mac_list=lan_info_collection()
+    _,_,mac_list=lan_info_collection()
     return mac_list if mac_list else []
 
 @pytest.fixture()
 def lan_device_number_get():
-    sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    i = 0
-    re = []
-    while True:
-        data = sub.stdout.readline().decode().strip().split(maxsplit=3)
-        for content in data:
-            if content.startswith('Ethernet'):
-                re.append(content)
-        if len(data) == 0:
-            i += 1
-        if i == 2:
-            break
+    # sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # i = 0
+    # re = []
+    # while True:
+    #     data = sub.stdout.readline().decode().strip().split(maxsplit=3)
+    #     for content in data:
+    #         if content.startswith('Ethernet'):
+    #             re.append(content)
+    #     if len(data) == 0:
+    #         i += 1
+    #     if i == 2:
+    #         break
+    re, _, _ = lan_info_collection()
     return re
 
 # get each ethernet lan device name for future usage
 def lan_device_number_get_other():
-    sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    i = 0
-    re = []
-    while True:
-        data = sub.stdout.readline().decode().strip().split(maxsplit=3)
-        for content in data:
-            if content.startswith('Ethernet'):
-                re.append(content)
-        if len(data) == 0:
-            i += 1
-        if i == 2:
-            break
+    # sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # i = 0
+    # re = []
+    # while True:
+    #     data = sub.stdout.readline().decode().strip().split(maxsplit=3)
+    #     for content in data:
+    #         if content.startswith('Ethernet'):
+    #             re.append(content)
+    #     if len(data) == 0:
+    #         i += 1
+    #     if i == 2:
+    #         break
+
+    re, _, _ = lan_info_collection()
     return re
 
 
