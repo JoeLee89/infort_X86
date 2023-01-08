@@ -25,7 +25,7 @@ def lan_info_collection():
     title_name=[]
     device=[]
     mac=[]
-    search_title = re.compile(r'Ethernet adapter Ethernet.*:')
+    search_title = re.compile(r'Ethernet adapter (Ethernet.*):')
     search_lan_name = re.compile(r'Description.*: (.*)')
     search_lan_address = re.compile(r'Physical Address.*: (.*)')
     # search_title = re.compile(r'乙太網路卡 (乙太網路.*):')
