@@ -64,9 +64,12 @@ def lan_info_collection():
     if not len(device) and not len(mac):
         title_name =list(lan_list.keys())
         for i in lan_list.values():
-            print(i)
+            # print(i)
             device.append(i[0])
             mac.append(i[1])
+    print('Title= ',title_name)
+    print('Device= ',device)
+    print('Mac= ',mac)
 
     return title_name, device, mac
 
