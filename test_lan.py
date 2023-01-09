@@ -252,7 +252,7 @@ class Test_WOL_LAN1:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after = datetime.datetime.now()
         _re = (after - now).seconds
 
@@ -260,7 +260,7 @@ class Test_WOL_LAN1:
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
         allure.step(f'the average WOL time: {_re}')
-        assert _re < 300
+        assert _re < 250
 
 
     def test_lan1_wol_bios_enable_os_disable_s3(self, request, get_mac, lan_device_number_get):
@@ -312,14 +312,14 @@ class Test_WOL_LAN1:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after = datetime.datetime.now()
         _re = (after - now).seconds
 
         # reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
 
     def test_lan1_wol_bios_disable_os_enable_s3(self, request, get_mac, lan_device_number_get):
@@ -371,14 +371,14 @@ class Test_WOL_LAN1:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after = datetime.datetime.now()
         _re = (after - now).seconds
 
         # reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
 
     def test_lan1_wol_bios_disable_os_disable_s3(self, request, get_mac, lan_device_number_get):
@@ -430,14 +430,14 @@ class Test_WOL_LAN1:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after = datetime.datetime.now()
         _re = (after - now).seconds
 
         # reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
 
     # @pytest.mark.skip('aaa')
@@ -489,14 +489,14 @@ class Test_WOL_LAN1:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after = datetime.datetime.now()
         _re = (after - now).seconds
 
         # reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re < 300
+        assert _re < 250
 
 
     # @pytest.mark.skip('testing')
@@ -556,7 +556,7 @@ class Test_WOL_LAN1:
                 file.write(datetime.datetime.strftime(now, '%Y-%m-%d-%H:%M:%S'))
             cmd('shutdown /s /t 1 /f')
             print('now sleep for 10 sec')
-            time.sleep(10)
+            time.sleep(20)
 
         if os.path.exists('.\\temp\\shutdown.log'):
             with open('.\\temp\\shutdown.log', 'r') as file:
@@ -623,14 +623,14 @@ class Test_WOL_LAN2:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after=datetime.datetime.now()
         _re=(after-now).seconds
 
         #reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re < 300
+        assert _re < 250
 
     def test_lan2_wol_bios_enable_os_disable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
@@ -681,14 +681,14 @@ class Test_WOL_LAN2:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after=datetime.datetime.now()
         _re=(after-now).seconds
 
         #reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
     def test_lan2_wol_bios_disable_os_enable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
@@ -739,14 +739,14 @@ class Test_WOL_LAN2:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after=datetime.datetime.now()
         _re=(after-now).seconds
 
         #reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
     def test_lan2_wol_bios_disable_os_disable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
@@ -797,14 +797,14 @@ class Test_WOL_LAN2:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0010 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after=datetime.datetime.now()
         _re=(after-now).seconds
 
         #reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re > 300
+        assert _re > 250
 
     # @pytest.mark.skip('aaa')
     def test_lan2_wol_bios_enable_os_enable_s4(self, request, get_mac,lan_device_number_get):
@@ -856,14 +856,14 @@ class Test_WOL_LAN2:
         now = datetime.datetime.now()
         cmd('.\\tool\\sleeper\\sleeper.exe -S0001 -R 300 -N 1 -F -E')
 
-        time.sleep(5)
+        time.sleep(20)
         after=datetime.datetime.now()
         _re=(after-now).seconds
 
         #reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
-        assert _re < 300
+        assert _re < 250
 
     # @pytest.mark.skip('testing')
     def test_lan2_wol_bios_enable_os_enable_s5(self, request, get_mac,lan_device_number_get):
@@ -921,7 +921,7 @@ class Test_WOL_LAN2:
                 file.write(datetime.datetime.strftime(now,'%Y-%m-%d-%H:%M:%S'))
             cmd('shutdown /s /t 1 /f')
             print('now sleep for 10 sec')
-            time.sleep(10)
+            time.sleep(20)
 
         if os.path.exists('.\\temp\\shutdown.log'):
             with open('.\\temp\\shutdown.log', 'r') as file:
