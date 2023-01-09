@@ -28,7 +28,10 @@ def lan_device_number_get():
 def wol(mac):
     time.sleep(30)
     print(f'Sending magic package ({mac})')
-    send_magic_packet(mac)
+    try:
+        send_magic_packet(mac)
+    except Exception as a:
+        print('error:',a)
 
 #make server IP as static IP first
 
@@ -40,7 +43,8 @@ re=lan_device_number_get()
 subprocess.Popen(f'netsh interface ip set address name="{re}" static {ip} {mask}')
 
 #start to launch server action
-host=ip
+# print(socket.gethostname())
+host=''
 port=8000
 server=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((host,port))

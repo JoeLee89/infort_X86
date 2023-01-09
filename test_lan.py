@@ -202,7 +202,7 @@ def lan_status_switch(status):
     time.sleep(5)
 
 class Test_WOL_LAN1:
-    def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_enable_os_enable_s3(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -262,7 +262,7 @@ class Test_WOL_LAN1:
         assert _re < 300
 
 
-    def test_lan1_wol_bios_enable_os_disable_s3(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_enable_os_disable_s3(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -321,7 +321,7 @@ class Test_WOL_LAN1:
         assert _re > 300
 
 
-    def test_lan1_wol_bios_disable_os_enable_s3(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_disable_os_enable_s3(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -380,7 +380,7 @@ class Test_WOL_LAN1:
         assert _re > 300
 
 
-    def test_lan1_wol_bios_disable_os_disable_s3(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_disable_os_disable_s3(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -440,7 +440,7 @@ class Test_WOL_LAN1:
 
 
     # @pytest.mark.skip('aaa')
-    def test_lan1_wol_bios_enable_os_enable_s4(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_enable_os_enable_s4(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -499,7 +499,7 @@ class Test_WOL_LAN1:
 
 
     # @pytest.mark.skip('testing')
-    def test_lan1_wol_bios_enable_os_enable_s5(request, get_mac, lan_device_number_get):
+    def test_lan1_wol_bios_enable_os_enable_s5(self, request, get_mac, lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         # confirm which lan device should be tested, starting from 0
         lan_number = 0
@@ -573,7 +573,7 @@ class Test_WOL_LAN1:
         assert _re < 300
 
 class Test_WOL_LAN2:
-    def test_lan2_wol_bios_enable_os_enable_s3(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_enable_os_enable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
@@ -631,7 +631,7 @@ class Test_WOL_LAN2:
         lan_link.close()
         assert _re < 300
 
-    def test_lan2_wol_bios_enable_os_disable_s3(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_enable_os_disable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
@@ -689,7 +689,7 @@ class Test_WOL_LAN2:
         lan_link.close()
         assert _re > 300
 
-    def test_lan2_wol_bios_disable_os_enable_s3(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_disable_os_enable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
@@ -747,7 +747,7 @@ class Test_WOL_LAN2:
         lan_link.close()
         assert _re > 300
 
-    def test_lan2_wol_bios_disable_os_disable_s3(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_disable_os_disable_s3(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
@@ -806,7 +806,7 @@ class Test_WOL_LAN2:
         assert _re > 300
 
     # @pytest.mark.skip('aaa')
-    def test_lan2_wol_bios_enable_os_enable_s4(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_enable_os_enable_s4(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
@@ -865,7 +865,7 @@ class Test_WOL_LAN2:
         assert _re < 300
 
     # @pytest.mark.skip('testing')
-    def test_lan2_wol_bios_enable_os_enable_s5(request, get_mac,lan_device_number_get):
+    def test_lan2_wol_bios_enable_os_enable_s5(self, request, get_mac,lan_device_number_get):
         # def test_lan2_wol_bios_enable_os_enable(request, get_mac,item,lan_device_number_get):
         #confirm which lan device should be tested, starting from 0
         lan_number=1
