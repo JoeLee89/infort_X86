@@ -15,8 +15,8 @@ intel_wakeonlan_type=[
     'i211-AT Wake on LAN']
 
 realtek_wakeonelan_type=[
-    'LAN1 Enable',
-    'LAN2 Enable']
+    'LAN Wake',
+    'LAN Wake']
 
 
 def lan_info_collection():
@@ -118,8 +118,8 @@ def lan_device_number_get():
     #         i += 1
     #     if i == 2:
     #         break
-    re, _, _ = lan_info_collection()
-    return re
+    title, _, _ = lan_info_collection()
+    return title
 
 # get each ethernet lan device name for future usage
 def lan_device_number_get_other():
@@ -136,8 +136,8 @@ def lan_device_number_get_other():
     #     if i == 2:
     #         break
 
-    re, _, _ = lan_info_collection()
-    return re
+    title, _, _ = lan_info_collection()
+    return title
 
 
 # to set pointed dut ip as static ip, and to make a connecting with server
@@ -195,6 +195,11 @@ def print_lan_info(name,mac):
         allure.step(f'Lan Name: {name}')
         allure.step(f'Lan MAC: {mac}')
 
+def lan_status_switch(status):
+    device_list=lan_device_number_get()
+    for lan_device in device_list:
+        subprocess.Popen(f'netsh interface set interface name="{lan_device}" admin={status}').wait()
+    time.sleep(5)
 
 class Test_WOL_LAN1:
     def test_lan1_wol_bios_enable_os_enable_s3(request, get_mac, lan_device_number_get):
@@ -938,9 +943,9 @@ def test_lan1_surf_web(request, lan_device_number_get):
     data.bios_set([[None, None, 'default']]).act()
 
     print('it is going to disable Lan2')
-    #disable lan2 first to make sure srufing web device is lan1
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
-    #enable lan1
+    #disable all lan first
+    lan_status_switch('disabled')
+    #enable the pointed lan
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
     time.sleep(20)
 
@@ -948,8 +953,8 @@ def test_lan1_surf_web(request, lan_device_number_get):
         _re=requests.get("https://www.google.com.tw/")
     except Exception as a:
         _re=a
-
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled').wait()
+    #enable all lan
+    lan_status_switch('enabled')
     time.sleep(20)
     assert _re.status_code == 200
 
@@ -959,9 +964,10 @@ def test_lan2_surf_web(request,lan_device_number_get):
     data.bios_set([[None, None, 'default']]).act()
 
     print('it is going to disable Lan1')
-    # disable lan1 first to make sure srufing web device is lan2
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=disabled')
-    # enable lan2
+    #disable all lan first
+    lan_status_switch('disabled')
+    #enable lan1
+    time.sleep(5)
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
     time.sleep(20)
 
@@ -970,7 +976,8 @@ def test_lan2_surf_web(request,lan_device_number_get):
     except Exception as a:
         _re = a
 
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled').wait()
+    #enable all lan
+    lan_status_switch('enabled')
     assert _re.status_code == 200
 #
 def test_lan1_download_file(request, lan_device_number_get):
@@ -978,24 +985,27 @@ def test_lan1_download_file(request, lan_device_number_get):
     data.bios_set([[None, None, 'default']]).act()
 
     print('it is going to disable Lan2')
-    #disable lan2 first to make sure srufing web device is lan1
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=disabled')
-    #enable lan1
+    #disable all lan first
+    lan_status_switch('disabled')
+    #enable pointed lan
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=enabled')
     time.sleep(30)
 
     link='http://http.speed.hinet.net/test_010m.zip'
     url=requests.get(link)
     content=len(url.content)
+    # enable all lan devices
+    lan_status_switch('enabled')
     assert content == 10485760
+
+
 #
 def test_lan2_download_file(request, lan_device_number_get):
     data = ActManage(item_total_path(), request.node.name)
     data.bios_set([[None, None, 'default']]).act()
 
-    print('it is going to disable Lan1')
-    # disable lan1 first to make sure srufing web device is lan2
-    subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[0]}" admin=disabled')
+    # disable all lan devices
+    lan_status_switch('disabled')
     # enable lan2
     subprocess.Popen(f'netsh interface set interface name="{lan_device_number_get[1]}" admin=enabled')
     time.sleep(30)
@@ -1003,6 +1013,8 @@ def test_lan2_download_file(request, lan_device_number_get):
     link='http://http.speed.hinet.net/test_010m.zip'
     url=requests.get(link)
     content=len(url.content)
+    # enable all lan devices
+    lan_status_switch('enabled')
     assert content == 10485760
 
 def test_s3(request):
