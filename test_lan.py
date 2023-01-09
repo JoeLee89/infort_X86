@@ -259,6 +259,7 @@ class Test_WOL_LAN1:
         # reset IP to dynamic status
         cmd(f'netsh interface ip set address "{lan_device_number_get[lan_number]}" dhcp')
         lan_link.close()
+        allure.step(f'the average WOL time: {_re}')
         assert _re < 300
 
 
