@@ -158,7 +158,7 @@ def lan_link_initial(lan_number):
 def device_wol_manage_action(name,require):
     from pywinauto import Application, Desktop
     name = name
-    require= require
+    require = require
     Application().start(r'mmc devmgmt.msc')
     app = Application(backend='uia').connect(path='mmc.exe')
     main = app.window(title='Device Manager')
@@ -167,28 +167,49 @@ def device_wol_manage_action(name,require):
     lan_target = lan.child_window(title=name, control_type='TreeItem', found_index=0)
     lan_target.click_input(button='left', double=True)
     win = app[f'{name} Properties']
-    win['Advanced'].select()
-    win['Vertical'].wheel_mouse_input(wheel_dist=-20)
-    win['Wake on Magic Packet'].select()
-    while True:
-        status = win['ComboBox'].selected_text()
-        if require == 'Enabled':
-            if status == require:
-                break
-            else:
-                win['ComboBox'].type_keys('{DOWN}')
-                if win['ComboBox'].selected_text() != require:
-                    win['ComboBox'].type_keys('{UP}')
-        if require == 'Disabled':
-            if status == require:
-                break
-            else:
-                win['ComboBox'].type_keys('{UP}')
-                if win['ComboBox'].selected_text() != require:
-                    win['ComboBox'].type_keys('{DOWN}')
 
+    try:
+        win['Advanced'].select()
+        win['Vertical'].wheel_mouse_input(wheel_dist=-20)
+        win['Wake on Magic Packet'].select()
+        while True:
+            status = win['ComboBox'].selected_text()
+            if require == 'Enabled':
+                if status == require:
+                    break
+                else:
+                    win['ComboBox'].type_keys('{DOWN}')
+                    if win['ComboBox'].selected_text() != require:
+                        win['ComboBox'].type_keys('{UP}')
+            if require == 'Disabled':
+                if status == require:
+                    break
+                else:
+                    win['ComboBox'].type_keys('{UP}')
+                    if win['ComboBox'].selected_text() != require:
+                        win['ComboBox'].type_keys('{DOWN}')
+    except Exception as a:
+        print('No any wake item in advanced page')
+        print(a)
+
+    win['Power Management'].select()
+    status_checkbox_00 = win['CheckBox2'].get_toggle_state()
+    status_checkbox_01 = win['CheckBox3'].get_toggle_state()
+    status_checkbox_00 = 'Enabled' if status_checkbox_00 else 'Disabled'
+    status_checkbox_01 = 'Enabled' if status_checkbox_01 else 'Disabled'
+    if status_checkbox_00 == 'Disabled':
+        win['CheckBox2'].click()
+    if status_checkbox_01 == 'Disabled':
+        win['CheckBox3'].click()
+    if require == 'Disabled':
+        win['CheckBox2'].click()
     win['OK'].click()
+    time.sleep(1)
     main.close()
+
+
+name = 'Intel(R) I211 Gigabit Network Connection'
+device_wol_manage_action(name, 'Disabled')
 
 def print_lan_info(name,mac):
     with allure.step('The Lan device:'):
