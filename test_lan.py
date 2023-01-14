@@ -191,7 +191,7 @@ def device_wol_manage_action(name,require):
     except Exception as a:
         print('No any wake item in advanced page')
         print(a)
-
+    # need to take the action of dis/ena wol function from the power management page
     win['Power Management'].select()
     status_checkbox_00 = win['CheckBox2'].get_toggle_state()
     status_checkbox_01 = win['CheckBox3'].get_toggle_state()
