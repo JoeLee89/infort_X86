@@ -38,7 +38,9 @@ class Futuremark_ThreeDMark(SW):
                 print('Error as : ', a)
                 return False
 
-        print('Please wait, while the installation is processing.')
+        process = subprocess.Popen(self.des_url + self.name + '\\' + '3dmark-setup.exe /uninstall /silent', shell=True)
+        process.wait()
+        print('Please wait, while the 3DMark installation is processing.')
         if not os.path.exists('c:\\3DMark'):
             process=subprocess.Popen(self.des_url+self.name+'\\'+'3dmark-setup.exe /installpath=c:\\ /install /silent',shell=True)
             re=process.wait()
@@ -87,8 +89,11 @@ class Futuremark_PCMark(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
+        process = subprocess.Popen(
+            self.des_url + self.name + '\\' + 'pcmark10-setup.exe /uninstall /silent', shell=True)
+        process.wait()
         if not os.path.exists('c:\\PCMark 10'):
-            print('Please wait, while the installation is processing.')
+            print('Please wait, while the PCMark installation is processing.')
             process=subprocess.Popen(self.des_url+self.name+'\\'+'pcmark10-setup.exe /installpath=c:\\ /install /silent',shell=True)
             re=process.wait()
             if re>0:
@@ -151,7 +156,7 @@ class Burnintest(SW):
             print('Look like there is no related executable file in the folder. skip the installation.')
             return False
         if not os.path.exists('C:\\Program Files\\BurnInTest'):
-            print('Please wait, while the installation is processing.')
+            print('Please wait, while the Burnin test installation is processing.')
             process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent /suppressmsgboxes',shell=True)
             re=process.wait()
             time.sleep(15)
@@ -256,7 +261,7 @@ class Sandra(SW):
             print('Look like there is not related execute file in the .\\tool\\. skip the installation.')
             return False
         if not os.path.exists('C:\\Program Files\\SiSoftware'):
-            print('Please wait, while the installation is processing.')
+            print('Please wait, while the Sandra installation is processing.')
             process=subprocess.Popen(self.des_url+self.name+'\\' + file_name + ' /verysilent ',shell=True)
             re=process.wait()
             time.sleep(15)

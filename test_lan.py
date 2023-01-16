@@ -208,9 +208,6 @@ def device_wol_manage_action(name,require):
     main.close()
 
 
-name = 'Intel(R) I211 Gigabit Network Connection'
-device_wol_manage_action(name, 'Disabled')
-
 def print_lan_info(name,mac):
     with allure.step('The Lan device:'):
         allure.step(f'Lan Name: {name}')
