@@ -48,14 +48,15 @@ class Futuremark_ThreeDMark(SW):
                 print('The installation got something wrong.')
                 return False
             else:
-                re=self.registry()
+                result=self.registry()
                 print('The installation is finished')
-                return True if re else False
+                return True if result else False
         else:
             return True
 
     def registry(self):
-        process=subprocess.Popen(f'c:\\{self.name}\\3DMarkCmd.exe --register={self.reg}', stdout=subprocess.PIPE)
+        process=subprocess.Popen(f'c:\\{self.name}\\3DMarkCmd.exe --register={self.reg}', stdout=subprocess.PIPE,shell=
+                                 True)
         reg_result=process.stdout.readlines()
         re=True
         for i in reg_result:
@@ -283,7 +284,7 @@ class Sandra(SW):
         target_folder = os.listdir(app_path)
         app = Application().start(cmd_line=f'{app_path}\\{target_folder[0]}\\sandra.exe')
         try:
-            app['Register'].wait('exists', 15)
+            app['Register'].wait('exists', 60)
             app['Register']['Edit'].type_keys(sn[0])
             app['Register'].type_keys('{ENTER}')
         except:
