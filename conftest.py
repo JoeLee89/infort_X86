@@ -49,6 +49,8 @@ def final():
         os.mkdir('temp')
     if not os.path.exists('tool'):
         os.mkdir('tool')
+    if not os.path.exists('performance'):
+        os.mkdir('performance')
     # 先裝sleeper tool，之後會一直需要
     result = InstallManage().set_name('sleeper')
     if not result:
