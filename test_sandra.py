@@ -59,7 +59,7 @@ def mainloopforsandra():
 
     if os.path.exists('.\\performance\\sandra_benchmark_report.txt'):
         #print('good')
-        sandrafile = open('.\\performance\\sandra_benchmark_report.txt', encoding="utf-8")
+        sandrafile = open('.\\performance\\sandra_benchmark_report.txt', encoding="utf-16")
         content = sandrafile.readline()
         while content:
             content = content.strip('\n')
