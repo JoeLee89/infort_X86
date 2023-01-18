@@ -42,7 +42,7 @@ def writing():
             print(repeat)
             performancefile.write('''\n
 ===================================
-=====SANTRA PERFORMANCE RESULT=====
+=====SANDRA PERFORMANCE RESULT=====
 ===================================\n''')
 
         content=content.replace(':',',')
@@ -57,9 +57,9 @@ def mainloopforsandra():
     global content
     global sandrafile
 
-    if os.path.exists('sandra_benchmark_report.txt'):
+    if os.path.exists('.\\performance\\sandra_benchmark_report.txt'):
         #print('good')
-        sandrafile = open('sandra_benchmark_report.txt', encoding="utf-16")
+        sandrafile = open('.\\performance\\sandra_benchmark_report.txt', encoding="utf-8")
         content = sandrafile.readline()
         while content:
             content = content.strip('\n')
@@ -74,8 +74,8 @@ def mainloopforsandra():
         print("Can't find the file sandra_benchmark_report.txt")
 
 
-def sandralaunch(folder):
-    app=Application(backend="win32").start(cmd_line=f'{folder}\\sandra.exe')
+def sandralaunch(path):
+    app=Application(backend="win32").start(cmd_line=f'{path}\\sandra.exe')
     dlg_spec=app['LocalComputer - SiSoftware Sandra']
     dlg_spec.wait('exists',timeout=50)
     app['Tip of the Day'].wait('exists',timeout=30)
@@ -87,7 +87,7 @@ def sandralaunch(folder):
     app["Create Report"].wait('visible')
     app["Create Report"].type_keys('^n')
     app["Create Report : Step 1 of 9"].wait('visible')
-    app["Create Report : Step 1 of 9"].type_keys('{UP 4}{TAB} %s \\test.sis' % (os.getcwd()))
+    app["Create Report : Step 1 of 9"].type_keys('{UP 4}{TAB} %s\\tool\\sandra\\test.sis' % (os.getcwd()))
     app["Create Report : Step 1 of 9"].type_keys('^n')
 
     app["Create Report : Step 2 of 9"].wait('exists',10)
@@ -112,7 +112,7 @@ def sandralaunch(folder):
     app["Create Report : Step 8 of 9"].type_keys('^n')
 
     app["Create Report : Step 9 of 9"].wait('exists',10)
-    app["Create Report : Step 9 of 9"].type_keys('%s \\sandra_benchmark_report.txt' % (os.getcwd()))
+    app["Create Report : Step 9 of 9"].type_keys('%s\\performance\\sandra_benchmark_report.txt' % (os.getcwd()))
     app["Create Report : Step 9 of 9"].type_keys('{ENTER}')
 
     waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
@@ -141,7 +141,7 @@ def test_sandra(request):
     if os.path.exists(target_folder):
         sandralaunch(target_folder)
         mainloopforsandra()
-        print('Santra performance is finished.')
+        print('Sandra performance is finished.')
     else:
         pytest.skip('Can not fine the related Sandra folder name, please check.')
 
