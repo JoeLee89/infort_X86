@@ -539,12 +539,12 @@ class Test_WOL_LAN1:
         # disable lan2 chip
         if 'intel' in result:
             data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
-                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                           ['Wake up minute', '5', 'value']]).act()
+                           ['RTC Wake system from S5', 'Dynamic Time', 'item'],
+                           ['Wake up minute increase', '5', 'value']]).act()
         else:
             data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
-                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                           ['Wake up minute', '5', 'value']]).act()
+                           ['RTC Wake system from S5', 'Dynamic Time', 'item'],
+                           ['Wake up minute increase', '5', 'value']]).act()
 
         lan = get_lan_name()
         # print lan related info to allure report
@@ -905,12 +905,12 @@ class Test_WOL_LAN2:
         #disable lan2 chip
         if 'intel' in result:
             data.bios_set([[intel_wakeonlan_type[lan_number], bios_status, 'item'],
-                           ['RTC Wake system from S5', 'Fixed Time','item'],
-                           ['Wake up minute', '5','value']]).act()
+                           ['RTC Wake system from S5', 'Dynamic Time', 'item'],
+                           ['Wake up minute increase', '5', 'value']]).act()
         else:
             data.bios_set([[realtek_wakeonelan_type[lan_number], bios_status, 'item'],
-                           ['RTC Wake system from S5', 'Fixed Time', 'item'],
-                           ['Wake up minute', '5', 'value']]).act()
+                           ['RTC Wake system from S5', 'Dynamic Time', 'item'],
+                           ['Wake up minute increase', '5', 'value']]).act()
 
         lan = get_lan_name()
         # print lan related info to allure report
