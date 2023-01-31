@@ -228,9 +228,9 @@ class Action:
 
 
 
-act=Action()
-act.set_item('RTC Wake system from S5', 'abc','item')
-act.action()
+# act=Action()
+# act.set_item('RTC Wake system from S5', 'abc','item')
+# act.action()
 #
 
 # act=Action()
