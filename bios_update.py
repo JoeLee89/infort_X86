@@ -15,9 +15,10 @@ class BiosData:
 
 
     def extract(self):
-        process = subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /o /s {self.folder_path}\\nvram.txt', shell=True,
-                                   stdout=subprocess.PIPE)
-        print(process.stdout.read())
+        if not os.path.exists(f'{self.folder_path}\\nvram.txt'):
+            process = subprocess.Popen(f'{self.folder_path}\\SCEWIN_64.exe /o /s {self.folder_path}\\nvram.txt', shell=True,
+                                       stdout=subprocess.PIPE)
+            print(process.stdout.read())
 
         #save the default bios setting at first initial.
         if not os.path.exists(f'{self.folder_path}\\default.txt'):
@@ -37,22 +38,36 @@ class BiosData:
         visitor.action(self)
 
 
-    def search(self):
+    def search(self,type='value'):
         with open(f'{self.folder_path}\\nvram.txt') as f:
             self.data=f.readlines()
             # print(self.data)
-        re=0
-        #find the needed title first, then find the end of the item
-        for i in self.data:
-            if self.title_name in i:
-                re=self.data.index(i)
-                for i in self.data[re:]:
-                    if i != '\n':
-                        self.list.append(i)
-                    else:
-                        break
 
-                return self.data[:6] + self.list
+        result=1
+        #find the needed title first, then find the end of the item
+        for num,i in enumerate(self.data):
+            # print('data=',i)
+            if self.title_name in i:
+                # re=self.data.index(i)
+                # when set type = item, check if data from self.data[re + 6:re + 6 + 4] contain the string
+                # from self.target_name, and then result=1 for further usage.
+                if type == 'item':
+                    for item in self.data[num+6:num+6+4]:
+                        if self.target_name in item:
+                            result=1
+                            break
+                        else:
+                            result=0
+                            continue
+                if result == 1:
+                    for i in self.data[num:]:
+                        if i != '\n':
+                            self.list.append(i)
+                        else:
+                            break
+                    print('result============')
+                    print(self.data[:6] + self.list)
+                    return self.data[:6] + self.list
             else:
                 continue
         raise LookupError('Can not find the assigned title name in bios setting')
@@ -117,7 +132,7 @@ class ChangeItems(Method):
         super().__init__()
 
     def action(self,datanode):
-        self.data=datanode.search()
+        self.data=datanode.search('item')
         self.start_location = self.search_title()
         self.target_location= self.search_target(datanode.target_name)
         # clear the string * first
@@ -213,10 +228,11 @@ class Action:
 
 
 
-# act=Action()
-# act.set_item('RTC Wake system from S5', 'Enabled','item')
-# act.action()
+act=Action()
+act.set_item('RTC Wake system from S5', 'abc','item')
+act.action()
 #
+
 # act=Action()
 # act.set_item('Wake up minute', '2','value')
 # act.action()
