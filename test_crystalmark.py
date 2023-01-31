@@ -40,7 +40,7 @@ class Crystal:
                 pass
             self.app['Dialog']['Stop'].wait_not('enabled', 400, 5)
 
-            hd_type = self.app['CrystalDiskMark.*']['ComboBox3'].ItemTexts()  # 回傳是字典，可以search 相關title去找key即可
+            hd_type = self.app['CrystalDiskMark.*']['ComboBox3'].item_texts()  # 回傳是字典，可以search 相關title去找key即可
             string = 'Device ' + ': ' + hd_type[a] + '\n'
             self.filewriting(string)
 
