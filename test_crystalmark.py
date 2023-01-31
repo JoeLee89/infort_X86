@@ -134,8 +134,8 @@ class Crystal:
 
 
 def test_crystalmark(request):
-    # data = ActManage(item_total_path(), request.node.name)
-    # data.bios_set([[None, None, 'default']]).act()
+    data = ActManage(item_total_path(), request.node.name)
+    data.bios_set([[None, None, 'default']]).act()
 
     re=InstallManage().set_name('crystaldiskmark')
     if not re:
