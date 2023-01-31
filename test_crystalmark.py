@@ -4,24 +4,10 @@ import time,os,pytest,allure
 from common_func import *
 from tools_manage import *
 class Crystal:
-    def __init__(self):
+    def __init__(self,item,app):
         self.i=0
         self.folder='performance'
-        self.item=None
-        self.app=None
-
-    @property
-    def item(self):
-        return self.item
-    @item.setter
-    def item(self,item):
         self.item=item
-
-    @property
-    def app(self):
-        return self.app
-    @app.setter
-    def app(self,app):
         self.app=app
 
     def filewriting(self,content):
@@ -148,13 +134,12 @@ class Crystal:
 
 
 def test_crystalmark(request):
-    data = ActManage(item_total_path(), request.node.name)
-    data.bios_set([[None, None, 'default']]).act()
+    # data = ActManage(item_total_path(), request.node.name)
+    # data.bios_set([[None, None, 'default']]).act()
 
     re=InstallManage().set_name('crystaldiskmark')
     if not re:
         pytest.skip('The Crystal Mark installation process is failed, so skip the test.')
-
 
     app = Application().start(cmd_line=r'.\tool\CrystalDiskMark\DiskMark64.exe')
     # app = Application().start(cmd_line=r'notepad.exe')
@@ -164,23 +149,9 @@ def test_crystalmark(request):
 
     item = app['CrystalDiskMark.*']['ComboBox3'].item_count()
     # app['CrystalDiskMark'].menu_select('檔案(&F) -> 開新檔案(&N)	Ctrl+N')
-    crystal=Crystal()
-    crystal.item=item
-    crystal.app=app
+    crystal=Crystal(item,app)
     crystal.launchassd()
     app.kill()
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
