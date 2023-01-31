@@ -112,7 +112,6 @@ class Reboot(Process):
         # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
         if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
             if len(self.bios_setting) > 0:
-
                 with open(f'{self.auto_location}run.bat','w') as f:
                     f.write(_data)
                 with open(f'{self.temp_log_location}{self.name}_rebooted.txt','w') as a:
