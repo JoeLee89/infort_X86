@@ -44,7 +44,7 @@ def launchapp():
             time.sleep(5)
             i+=1
 
-            if not appp.is_process_running() and i< 540:
+            if not appp.is_process_running() and i < 1440:
                 break
 
             elif i == 540:
