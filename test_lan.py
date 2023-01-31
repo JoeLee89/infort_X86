@@ -227,7 +227,6 @@ class Test_WOL_LAN1:
         os_wol_status = 'Enabled'
         bios_status = 'Enabled'
         allure.title('')
-
         command = 'wmic nic where netEnabled=true get name'
 
         # get all lan devices info
