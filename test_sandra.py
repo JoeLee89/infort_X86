@@ -115,16 +115,26 @@ def sandralaunch(path):
     app["Create Report : Step 9 of 9"].type_keys('%s\\performance\\sandra_benchmark_report.txt' % (os.getcwd()))
     app["Create Report : Step 9 of 9"].type_keys('{ENTER}')
 
-    waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
+    # waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
     #app["Create Report - SiSoftware Sandra"].wait_cpu_usage_lower(threshold=5)  # wait until CPU usage is lower than 5%
     #print(waittoclose)
 
-
-    while 'Create Report' in str(waittoclose):
-        waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
-        #print(waittoclose)
-        time.sleep(1)
-    app.window(best_match='LocalComputer - SiSoftware Sandra').close()
+    count=0
+    while True:
+        try:
+            app["Create Report - SiSoftware Sandra"].wait('exists')
+            if count > 2000:
+                app["Create Report - SiSoftware Sandra"].close()
+                break
+            else:
+                count+=1
+        except:
+            break
+    try:
+        app['.*SiSoftware Sandra'].close()
+    except Exception as a:
+        print('Got exception while trying to close the sandra tool : ', a)
+        print('The sandra tool looks it has been closed before, so the performance test is finished.')
     #waittoclose=app["Create Report - SiSoftware Sandra"].wait_not('visible')
 
 
