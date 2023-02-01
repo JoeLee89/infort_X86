@@ -6,6 +6,7 @@ from tools_manage import *
 import pytest, allure
 from common_func import *
 from tools_manage import *
+import datetime
 
 #pywinauto.timings.Timings.slow()
 
@@ -75,6 +76,12 @@ def mainloopforsandra():
 
 
 def sandralaunch(path):
+    # in case if performance has been launched before, to rename the test report first.
+    file=os.path.exists('%s\\performance\\sandra_benchmark_report.txt' % (os.getcwd()))
+    if file:
+        now=datetime.datetime.now()
+        os.rename('.\\performance\\sandra_benchmark_report.txt',f'.\\performance\\sandra_benchmark_report_{now.time().strftime("%H%M%S")}.txt')
+
     app=Application(backend="win32").start(cmd_line=f'{path}\\sandra.exe')
     dlg_spec=app['LocalComputer - SiSoftware Sandra']
     dlg_spec.wait('exists',timeout=50)
