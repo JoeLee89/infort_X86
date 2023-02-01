@@ -38,10 +38,11 @@ class Futuremark_ThreeDMark(SW):
                 print('Error as : ', a)
                 return False
 
-        process = subprocess.Popen(self.des_url + self.name + '\\' + '3dmark-setup.exe /uninstall /silent', shell=True)
-        process.wait()
         print('Please wait, while the 3DMark installation is processing.')
         if not os.path.exists('c:\\3DMark'):
+            process = subprocess.Popen(self.des_url + self.name + '\\' + '3dmark-setup.exe /uninstall /silent',
+                                       shell=True)
+            process.wait()
             process=subprocess.Popen(self.des_url+self.name+'\\'+'3dmark-setup.exe /installpath=c:\\ /install /silent',shell=True)
             re=process.wait()
             if re>0:
