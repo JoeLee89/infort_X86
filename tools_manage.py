@@ -38,8 +38,8 @@ class Futuremark_ThreeDMark(SW):
                 print('Error as : ', a)
                 return False
 
-        print('Please wait, while the 3DMark installation is processing.')
         if not os.path.exists('c:\\3DMark'):
+            print('Please wait, while the 3DMark installation is processing.')
             process = subprocess.Popen(self.des_url + self.name + '\\' + '3dmark-setup.exe /uninstall /silent',
                                        shell=True)
             process.wait()
@@ -91,11 +91,12 @@ class Futuremark_PCMark(SW):
                 print('can not find related files from the url.')
                 print('Error as : ', a)
                 return False
-        process = subprocess.Popen(
-            self.des_url + self.name + '\\' + 'pcmark10-setup.exe /uninstall /silent', shell=True)
-        process.wait()
+
         if not os.path.exists('c:\\PCMark 10'):
             print('Please wait, while the PCMark installation is processing.')
+            process = subprocess.Popen(
+                self.des_url + self.name + '\\' + 'pcmark10-setup.exe /uninstall /silent', shell=True)
+            process.wait()
             process=subprocess.Popen(self.des_url+self.name+'\\'+'pcmark10-setup.exe /installpath=c:\\ /install /silent',shell=True)
             re=process.wait()
             if re>0:
