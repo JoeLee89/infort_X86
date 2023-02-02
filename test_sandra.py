@@ -10,7 +10,6 @@ import datetime
 
 #pywinauto.timings.Timings.slow()
 
-repeat=False
 needitem=['<<< Processor Arithmetic >>>',
           '<<< Processor Multi-Media >>>',
           '<<< Processor Cryptography >>>',
@@ -28,29 +27,22 @@ needitem=['<<< Processor Arithmetic >>>',
 folder='performance'
 
 def writing():
+    global sandrafile,content,repeat
+    blank = 0
+    performancefile = open(f'.\\{folder}\\sandra_performance_result.csv', 'a')
 
     try:
         os.mkdir(f'.\\{folder}')
     except:
-        print('file exits, so skip create performance folder.')
+        print('file exits, so skip to create performance folder.')
 
-    performancefile=open(f'.\\{folder}\\sandra_performance_result.csv','a')
     while True:
-        global content
-        global repeat
-        if repeat==False:
-            repeat=True
-            print(repeat)
-            performancefile.write('''\n
-===================================
-=====SANDRA PERFORMANCE RESULT=====
-===================================\n''')
-
         content=content.replace(':',',')
         performancefile.write(content)
-        print(content)
         content = sandrafile.readline()
-        if "< Benchmark Status >" in content:
+        if len(content) == 0:
+            blank+=1
+        if "< Benchmark Status >" in content or blank >4:
             performancefile.close()
             return
 
@@ -59,13 +51,10 @@ def mainloopforsandra():
     global sandrafile
 
     if os.path.exists('.\\performance\\sandra_benchmark_report.txt'):
-        #print('good')
         sandrafile = open('.\\performance\\sandra_benchmark_report.txt', encoding="utf-16")
         content = sandrafile.readline()
         while content:
             content = content.strip('\n')
-            # print(content)
-            # input()
 
             if content in needitem:
                 writing()
