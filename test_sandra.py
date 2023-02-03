@@ -160,6 +160,7 @@ def test_sandra(request):
     target_folder=os.listdir('C:\\Program Files\\SiSoftware')[0]
     target_folder='C:\\Program Files\\SiSoftware\\' + target_folder
     if os.path.exists(target_folder):
+        print('Start launching the sandra tool, and testing performance.')
         sandralaunch(target_folder)
         mainloopforsandra()
         print('Sandra performance is finished.')
