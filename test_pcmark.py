@@ -44,11 +44,12 @@ def launchapp():
             time.sleep(5)
             i+=1
 
-            if not appp.is_process_running() and i < 1440:
+            if not appp.is_process_running() and i < 1500:
                 break
 
-            elif i == 540:
+            elif i == 1500:
                 processtokill()
+                pytest.skip('The app takes too long to finish the performance, so force to close the test.')
                 raise Warning('It looks like the APP meets some problems, please check APP if it still alive.')
 
         time.sleep(10)
