@@ -64,6 +64,12 @@ def mainloopforsandra():
         print("Can't find the file sandra_benchmark_report.txt")
 
 
+def processtokill():
+    for proc in psutil.process_iter():
+        # print(proc.name)
+        if 'Sandra' in str(proc.name):
+            proc.kill()
+
 def sandralaunch(path):
     # in case if performance has been launched before, to rename the test report first.
     file=os.path.exists('%s\\performance\\sandra_benchmark_report.txt' % (os.getcwd()))
@@ -115,24 +121,31 @@ def sandralaunch(path):
     # waittoclose=app["Create Report - SiSoftware Sandra"].wait('exists')
     #app["Create Report - SiSoftware Sandra"].wait_cpu_usage_lower(threshold=5)  # wait until CPU usage is lower than 5%
     #print(waittoclose)
+    app_check=app["Create Report - .*"].wait('exists',10,5)
+    if app_check:
+        time.sleep(10)
 
-    count=0
-    while True:
-        try:
-            time.sleep(5)
-            app["Create Report - SiSoftware Sandra"].wait('exists')
-            if count > 2000:
-                app["Create Report - SiSoftware Sandra"].close()
-                break
-            else:
-                count+=1
-        except:
-            break
+
+    # count=0
+    # while True:
+    #     try:
+    #         time.sleep(1)
+    #         app["Create Report - .*"].wait('visible',10,5)
+    #         print('still alive')
+    #         if count > 2000:
+    #             app["Create Report - SiSoftware Sandra"].close()
+    #             break
+    #         else:
+    #             count+=1
+    #     except Exception as a:
+    #         print('exit')
+    #         print(a)
+    #         break
     try:
-        app['.*SiSoftware Sandra'].close()
+        app.kill()
+        processtokill()
     except Exception as a:
         print('Got exception while trying to close the sandra tool : ', a)
-        print('The sandra tool looks it has been closed before, so the performance test is finished.')
     #waittoclose=app["Create Report - SiSoftware Sandra"].wait_not('visible')
 
 
