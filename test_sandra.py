@@ -123,7 +123,7 @@ def sandralaunch(path):
     #print(waittoclose)
     app_check=app["Create Report - .*"].wait('exists',10,5)
     if app_check:
-        time.sleep(10)
+        time.sleep(7200)
 
 
     # count=0
