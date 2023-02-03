@@ -14,7 +14,7 @@ class Crystal:
         try:
             os.mkdir(f'.\\{self.folder}')
         except:
-            print('file exits, so skip create performance folder.')
+            pass
         testresult = open(f'.\\{self.folder}\\CrystalDiskMark_performance_result.csv', 'a')
         testresult.write(content)
         testresult.close()

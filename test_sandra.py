@@ -77,8 +77,9 @@ def sandralaunch(path):
     app['Tip of the Day'].wait('exists',timeout=30)
     app.window(best_match='Tip of the Day').close()
     #dlg_spec['&Tools'].click()
-    app['LocalComputer - SiSoftware Sandra'].move_window(x=0,y=0)
-    pywinauto.mouse.click('left',coords=(190, 50))
+    app['LocalComputer - SiSoftware Sandra'].move_window(x=100, y=0, width=800, height=500)
+    # make it more pricise when click the target position within the app range, not within monitor range
+    app['LocalComputer - SiSoftware Sandra'].click_input('left', coords=(190, 50))
     pywinauto.keyboard.send_keys('{DOWN 4}{ENTER}')
     app["Create Report"].wait('visible')
     app["Create Report"].type_keys('^n')
