@@ -119,6 +119,7 @@ def sandralaunch(path):
     count=0
     while True:
         try:
+            time.sleep(5)
             app["Create Report - SiSoftware Sandra"].wait('exists')
             if count > 2000:
                 app["Create Report - SiSoftware Sandra"].close()
