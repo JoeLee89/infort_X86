@@ -83,6 +83,6 @@ def test_pcmark(request):
         pytest.skip('The PCMark installation process is failed, so skip the test.')
 
     launchapp()
-    if os.path.exists(f'.\\performance\\PCMark10_performance_result.cs'):
+    if os.path.exists(f'.\\performance\\PCMark10_performance_result.csv'):
         with allure.step('Performance Result'):
             allure.attach.file(f'.\\performance\\PCMark10_performance_result.csv')
