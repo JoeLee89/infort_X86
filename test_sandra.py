@@ -122,7 +122,7 @@ def sandralaunch(path):
     #app["Create Report - SiSoftware Sandra"].wait_cpu_usage_lower(threshold=5)  # wait until CPU usage is lower than 5%
     #print(waittoclose)
     app_check=app["Create Report - .*"].wait('exists',10,5)
-    timedelta=datetime.timedelta(hours=2)
+    timedelta=datetime.timedelta(hours=4)
     finish_time=datetime.datetime.now()+timedelta
     if app_check:
         while True:
