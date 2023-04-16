@@ -1,5 +1,5 @@
 from wakeonlan import send_magic_packet
-import subprocess,time,socket
+import subprocess,time,socket,msvcrt
 
 def lan_device_number_get():
     _code=''
@@ -11,18 +11,25 @@ def lan_device_number_get():
     sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     re = None
+    got_data_length_times=0
     while True:
         data = sub.stdout.readline().strip().decode(_code).split(maxsplit=3)
+        print('data len=',data)
+        time.sleep(1)
+        if len(data) == 0:
+            got_data_length_times+=1
         if 'Connected' in data or '已連線' in data:
             for content in data:
                 if content.startswith('Ethernet') or content.startswith('區域連線'):
-                    re=content
-        else:
+                    re = content
+        elif got_data_length_times < 3:
             continue
+
         # find the first ethernet device and then exit. it means the first connected lan device.
         # so before server launch, only one lan can be connected.
         if re or len(data) == 0:
             break
+
     return re
 
 def wol(mac):
@@ -40,7 +47,11 @@ mask='255.255.255.0'
 print('set up the first connected etherner device IP as static IP.')
 print(f'IP= {ip}, MASK=255.255.255.0')
 re=lan_device_number_get()
+print('re=',re)
+if not re:
+    raise RuntimeError(f'ethernet={re}. Can not get the correct ethernet name from the system.')
 subprocess.Popen(f'netsh interface ip set address name="{re}" static {ip} {mask}')
+# subprocess.Popen(f'netsh interface ip set address name="{re}" dhcp')
 
 #start to launch server action
 # print(socket.gethostname())
@@ -57,6 +68,12 @@ while True:
     except Exception as a:
         print('Error message occurs:', a)
         continue
+    get = msvcrt.kbhit()
+    if get == 'x':
+        subprocess.Popen(f'netsh interface ip set address name="{re}" dhcp')
+        break
+
+
     print('client MAC=', client_message)
     print('Server will send WOL package to client after 30 second.')
     conn.sendall(b'ok')
