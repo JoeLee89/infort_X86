@@ -9,18 +9,17 @@ def lan_device_number_get():
     except UnicodeDecodeError:
         _code='big5'
     sub = subprocess.Popen('netsh interface show interface', stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-
     re = None
     got_data_length_times=0
     while True:
         data = sub.stdout.readline().strip().decode(_code).split(maxsplit=3)
-        print('data len=',data)
         time.sleep(1)
         if len(data) == 0:
             got_data_length_times+=1
         if 'Connected' in data or '已連線' in data:
             for content in data:
                 if content.startswith('Ethernet') or content.startswith('區域連線'):
+                # if content.startswith('Ethernet') or content.startswith('乙太網路'):
                     re = content
         elif got_data_length_times < 3:
             continue
