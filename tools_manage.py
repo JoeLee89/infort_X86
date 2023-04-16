@@ -322,6 +322,23 @@ class CrystalDiskMark(SW):
         print('the installation is finished')
         return True
 
+class Iperf(SW):
+    def __init__(self):
+        super().__init__()
+        self.name='iperf'
+
+    def install(self):
+        if not self.check(self.name):
+            try:
+                shutil.copytree(self.sour_url + self.name, self.des_url+self.name)
+                print('the installation is finished')
+                return True
+            except Exception as a:
+                print('can not find related files from the url.')
+                print('Error as : ', a)
+                return False
+        print('the installation is finished')
+        return True
 
 
 class InstallManage:
@@ -361,6 +378,10 @@ class InstallManage:
 
         elif name=='sleeper':
             sw = Sleeper()
+            re = sw.install()
+
+        elif name=='iperf':
+            sw = Iperf()
             re = sw.install()
 
         return re
