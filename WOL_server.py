@@ -62,6 +62,7 @@ server.bind((host,port))
 server.setblocking(False)
 server.listen(5)
 
+# launch the iperf server mode
 iperf_server = subprocess.Popen('.\\tool\\iperf\\iperf3.exe -s',stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
 try:
     iperf_server.wait(2)
@@ -70,6 +71,8 @@ except:
 print('='*50)
 print('Start Iperf server mode')
 print('='*50)
+
+# detect the return code if it is not 0, then report the error message
 return_code=0 if iperf_server.returncode is None else iperf_server.returncode
 if return_code > 0:
     print('\n')
