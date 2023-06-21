@@ -1,5 +1,6 @@
 import pytest,items_collection,os,subprocess,re
 from tools_manage import InstallManage
+import common_func
 
 
 # def pytest_addoption(parser):
@@ -40,7 +41,11 @@ def comparison():
 
     return content_ori == now_test_case
 
-
+@pytest.fixture(scope='function', autouse=True)
+def init_fun():
+    pass
+    yield
+    items_collection.func_sorting(common_func.item_total_path())
 
 @pytest.fixture(scope='session',autouse=True)
 def final():
@@ -58,44 +63,69 @@ def final():
 
     items_collection.data_collection()
 
-    yield None
+    yield
+    # # after item test is finished, the following is going to test.
+    # # compare count number with the file test_item_original.txt list, if they are the same
+    # # compare_result = comparison()
+    #
+    # # record how many test items remain, if ==0 means all test is finished.
+    # with open('.\\test_item.txt','r') as file:
+    #     re=file.readlines()
+    #
+    # # if test_item.txt has no test item, and compare_result is FALSE, it means all items are finished.
+    # # if len(re) >0 and compare_result:
+    # if len(re) > 0:
+    #     items=re[0].replace('\n','')
+    #     del re[0]
+    #     with open('.\\test_item.txt', 'w') as file:
+    #         file.writelines(re)
+    #     print('\ntest item=', items)
+    #     # pytest.main(['-vs', items, '--alluredir=.\\report'])
+    #     sub=subprocess.Popen(f'pytest -vs {items} --alluredir=.\\report')
+    #     sub.wait()
+    #     sub.kill()
+    #
+    # else:
+    #     # os.unlink('.\\count.txt')
+    #     try:
+    #         startup_bat_path = os.path.expanduser(
+    #             '~') + '\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\run.bat'
+    #         os.unlink('.\\test_item.txt')
+    #         os.unlink('.\\test_item_original.txt')
+    #         os.unlink(startup_bat_path)
+    #         temp_file=os.listdir('.\\temp')
+    #         for i in temp_file:
+    #             print('Deleting file:', i)
+    #             os.unlink(f'.\\temp\\{i}')
+    #     except Exception as a:
+    #         print('Error occurred:', a)
+    #
+    #     # pytest.exit('All test items are finished, so exit the test.')
 
-    # after item test is finished, the following is going to test.
-    # compare count number with the file test_item_original.txt list, if they are the same
-    # compare_result = comparison()
+    try:
+        startup_bat_path = os.path.expanduser(
+            '~') + '\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\run.bat'
+        os.unlink(startup_bat_path)
+    except Exception as a:
+        print('Error occurred:', a)
 
-    # record how many test items remain, if ==0 means all test is finished.
-    with open('.\\test_item.txt','r') as file:
-        re=file.readlines()
+    try:
+        os.unlink('.\\test_item.txt')
 
-    # if test_item.txt has no test item, and compare_result is FALSE, it means all items are finished.
-    # if len(re) >0 and compare_result:
-    if len(re) > 0:
-        items=re[0].replace('\n','')
-        del re[0]
-        with open('.\\test_item.txt', 'w') as file:
-            file.writelines(re)
-        print('\ntest item=', items)
-        # pytest.main(['-vs', items, '--alluredir=.\\report'])
-        sub=subprocess.Popen(f'pytest -vs {items} --alluredir=.\\report')
-        sub.wait()
-        sub.kill()
+    except Exception as a:
+        print('Error occurred:', a)
 
-    else:
-        # os.unlink('.\\count.txt')
-        try:
-            startup_bat_path = os.path.expanduser(
-                '~') + '\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\run.bat'
-            os.unlink('.\\test_item.txt')
-            os.unlink('.\\test_item_original.txt')
-            os.unlink(startup_bat_path)
-            temp_file=os.listdir('.\\temp')
-            for i in temp_file:
-                print('Deleting file:', i)
-                os.unlink(f'.\\temp\\{i}')
-        except Exception as a:
-            print('Error occurred:', a)
+    try:
+        os.unlink('.\\test_item_original.txt')
 
-        # pytest.exit('All test items are finished, so exit the test.')
+    except Exception as a:
+        print('Error occurred:', a)
 
+    try:
+        temp_file = os.listdir('.\\temp')
+        for i in temp_file:
+            print('Deleting file:', i)
+            os.unlink(f'.\\temp\\{i}')
+    except Exception as a:
+        print('Error occurred:', a)
 
