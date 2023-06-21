@@ -62,8 +62,8 @@ def data_collection():
     print('Start collecting all test item info and write to test_item.txt....')
 
     if not os.path.exists('.\\test_item.txt'):
-        while True:
 
+        while True:
             content = res.stdout.readline()
             _text=content.decode()
             data.set_txt(_text)
@@ -71,20 +71,32 @@ def data_collection():
             if len(content) == 0:
                 break
 
-
         # delete the first test item, because the first item will launch automatically at first test by pytest command
         with open('.\\test_item.txt', 'r') as file:
-            re = file.readlines()
+            result = file.readlines()
 
         with open('.\\test_item_original.txt', 'w') as file:
-            file.writelines(re)
-
-        with open('.\\test_item.txt', 'w') as file:
-            del re[0]
-            file.writelines(re)
+            file.writelines(result)
 
     else:
         print('The test_item.txt exists, so skip to collect test item info.')
+
+
+def func_sorting(test_item):
+    with open('.\\test_item.txt', 'r') as file:
+
+        re = file.readlines()
+        re_=[i.strip() for i in re]
+        # for i in re:
+        #     re_.append(i.strip())
+        re=re_
+        # print('file content=',re_)
+        # import time
+        # time.sleep(10)
+    with open('.\\test_item.txt', 'w') as file:
+        del re[re.index(test_item)]
+        file.writelines(re)
+
 
 # if __name__ == '__main__':
 #     data_collection()
