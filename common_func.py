@@ -3,7 +3,7 @@ import bios_update
 from abc import ABC,abstractmethod
 
 def item_total_path():
-    return re.search(r'(.*) \(call\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
+    return re.search(r'(.*) \(.*\)', os.getenv('PYTEST_CURRENT_TEST')).group(1)
 
 
 def cmd(command):
@@ -70,7 +70,7 @@ class Bios(Process):
         self.bios_setting=content
 
     def act(self):
-        if len(self.bios_setting[0]) == 0:
+        if len(self.bios_setting) == 0:
             print('bios setting has not been assigned, so skip bios update process')
             return self.next_duty.act()
         # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
@@ -101,22 +101,32 @@ class Reboot(Process):
 
     def act(self):
         file_name=None
-        #to rememmber command line file name needed to be tested. so it each reboot will launch the same setting
+        #to remeber command line file name needed to be tested. so it each reboot will launch the same setting
         # as it is set at first by user
         for i in sys.argv:
             if '.py' in i:
                 file_name=i
+        total_test_item=''
+        with open('.\\test_item.txt','r') as file:
+            total_test_item_list=file.readlines()
+            for i in total_test_item_list:
+                total_test_item += i.strip() + ' '
 
         # _data = f'{self.script_location}venv\\Scripts\\activate.bat && pytest -vs {self.script_location}{file_name} --item={self.item}'
-        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\allure-results '
+        # _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {self.path} --alluredir=.\\allure-results '
+        _data = f'{self.script_location}venv\\Scripts\\activate.bat && cd {self.script_location} && pytest -vs {total_test_item} --alluredir=.\\allure-results'
         # if not os.path.exists(f'{self.script_location}{self.name}_rebooted.txt'):
+
+        # check if the test item have rebooted before of not, if not, then write the rebooted.txt file and reboot the DUT
         if not os.path.exists(f'{self.temp_log_location}{self.name}_rebooted.txt'):
+
+            # check if self.bios_setting is set to reboot, and then save rebooted.txt file and reboot DUT
             if len(self.bios_setting) > 0:
                 with open(f'{self.auto_location}run.bat','w') as f:
                     f.write(_data)
                 with open(f'{self.temp_log_location}{self.name}_rebooted.txt','w') as a:
-                # with open(f'{self.script_location}{self.name}_rebooted.txt','w') as a:
                     a.write('')
+
                 cmd('shutdown /r /t 1 /f')
                 print(f'Test item={self.name}. Reboot first, Function will not test, while bios item is being changing')
                 # pytest.skip(f'Test item={self.name}. First reboot will not test the function.')
@@ -177,10 +187,10 @@ class Data:
         return self._path
 
 class ActManage:
-    def __init__(self,path,name):
+    def __init__(self,test_item_path,name):
         self.bios_setting = None
         self.name=name
-        self.path=path
+        self.path=test_item_path
 
     def bios_set(self,value:list):
         self.bios_setting=value
