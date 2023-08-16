@@ -100,12 +100,14 @@ class Reboot(Process):
         self.next_duty=deputy
 
     def act(self):
-        file_name=None
-        #to remeber command line file name needed to be tested. so it each reboot will launch the same setting
-        # as it is set at first by user
-        for i in sys.argv:
-            if '.py' in i:
-                file_name=i
+        # file_name=None
+        # # to remember command line file name needed to be tested. so it each reboot will launch the same setting
+        # # as it is set at first by user
+        # for i in sys.argv:
+        #     if '.py' in i:
+        #         file_name=i
+
+        # to organize all test items in one line to add in run.bat file
         total_test_item=''
         with open('.\\test_item.txt','r') as file:
             total_test_item_list=file.readlines()
