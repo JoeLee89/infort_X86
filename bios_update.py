@@ -8,6 +8,7 @@ class BiosData:
         self.data=[]
         self.title_name=None
         self.target_name=None
+        self.token=None
         self.folder_path = '.\\tool\\AMISCE'
         self.list=[]
         self.extract()
@@ -32,11 +33,23 @@ class BiosData:
     def set_target_name(self,name):
         self.target_name=name
 
+    def set_token(self,token):
+        self.token=token
+
     def update(self,visitor):
         # re=self.search(self.name)
-
         visitor.action(self)
 
+    def confirm_token(self,start_loc):
+        if self.token:
+            for i in self.data[start_loc:]:
+                if self.token in i:
+                    return True
+                if i == '\n':
+                    break
+            return False
+        else:
+            return True
 
     def search(self,type='value'):
         with open(f'{self.folder_path}\\nvram.txt') as f:
@@ -60,19 +73,24 @@ class BiosData:
                             result=0
                             continue
                 if result == 1:
+                    # confirm if the toke item is needed to be check
+                    # if self.token = none, it means no need to check, and return true
+                    # if self.token = '' including string, and it search the target, and return true or false
+                    token_search=self.confirm_token(num)
+                    if not token_search:
+                        continue
+
                     for i in self.data[num:]:
                         if i != '\n':
                             self.list.append(i)
                         else:
                             break
-                    print('result============')
+                    print('============result============')
                     print(self.data[:6] + self.list)
                     return self.data[:6] + self.list
             else:
                 continue
         raise LookupError('Can not find the assigned title name in bios setting')
-
-
 
 
 class Method(ABC):
@@ -185,6 +203,9 @@ class Manager:
     def set_bios_target_item(self,name):
         self.data.set_target_name(name)
 
+    def set_bios_token_item(self,name):
+        self.data.set_token(name)
+
     def do_update(self,act):
         self.data.update(act)
 
@@ -197,15 +218,22 @@ class Action:
         self.target=''
         self.type=''
 
-    def set_item(self,title,target,type):
+    def set_item(self,title,target,type,toke=None):
         self.title=title
         self.target=target
         self.type=type
+        self.token=toke
+        '''
+        the token need to include the words [token =]
+        in case if it has the same number in other items to get any mistaken
+        self.token = 'Token	=65'
+        '''
 
     def action(self):
         lan=Manager()
         lan.set_bios_title_item(self.title)
         lan.set_bios_target_item(self.target)
+        lan.set_bios_token_item(self.token)
         item_change=ChangeItems()
         value_change=ChangeValue()
         default_bios=DefaultBios()
@@ -222,12 +250,17 @@ class Action:
         if self.type == 'default':
             lan.do_update(default_bios)
 
+# change value
 # act=Action()
-# act.set_item('Quiet Boot1', '0','value')
+# act.set_item('Quiet Boot', '0','value')
 # act.action()
 
+# change value with specific token
+# act=Action()
+# act.set_item('Serial Port', '0','value','Token	=65')
+# act.action()
 
-
+# change item
 # act=Action()
 # act.set_item('RTC Wake system from S5', 'abc','item')
 # act.action()
