@@ -5,8 +5,7 @@ from serial.tools import list_ports
 import serial.tools.list_ports
 import os
 import subprocess
-
-
+from common_func import *
 
 class Data:
     def __init__(self):
@@ -48,14 +47,14 @@ class Test_Loopback:
     def teardown_class(self):
         print('save log to file to recognize the class has been tested before')
 
-    def setup(self):
+    def setup_method(self):
         self.s=serial.Serial()
         self.verificationErrors=[]
         self.timeout=0
         self.data=Data()
         self.comportlist=self.data.comport_list()
 
-    def teardown(self):
+    def teardown_method(self):
         self.verificationErrors = []
         for aa in self.comportlist:
             self.s.port = aa
@@ -142,7 +141,9 @@ class Test_Loopback:
             print(f'PASS: {ports} RTS/CTS status matchs, while set RTS->{value}')
 
     @pytest.mark.parametrize("value", [True, False])
-    def test_DTR(self, value):
+    def test_DTR(self, value,request):
+        data = ActManage(item_total_path(), request.node.name)
+        data.bios_set([[None, None, 'default']]).act()
         for ports in self.comportlist:
             self.s.baudrate = self.data.default_speed
             self.s.port = ports
@@ -176,3 +177,13 @@ class Test_Loopback:
             re = self.read_write(self.s.bytesize)
             for write, read in re:
                 assert write == read, "Confirm if write = read data, and read=%s , write=%s" % (write, read)
+
+    def test_disable_com1(self,request):
+        data = ActManage(item_total_path(), request.node.name)
+        data.bios_set([['Serial Port', 'value' , '0','Token	=62']]).act()
+        assert 1==1
+
+
+    # def test_enable_com1(self):
+
+
